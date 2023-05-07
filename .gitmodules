@@ -5,6 +5,3 @@
 [submodule "Dependencies/implot"]
 	path = Dependencies/implot
 	url = https://github.com/epezent/implot.git
-[submodule "Dependencies/glfw"]
-	path = Dependencies/glfw
-	url = https://github.com/glfw/glfw.git
