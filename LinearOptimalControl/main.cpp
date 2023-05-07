@@ -15,19 +15,26 @@ int main()
     glfwInit();
 
     // Create a window
-    GLFWwindow* window = glfwCreateWindow(640, 480, "My Window", NULL, NULL);
+    glfwWindowHint(GLFW_VISIBLE, GLFW_TRUE);
+    GLFWwindow* window = glfwCreateWindow(1920, 1080, "Linear Optimal Control Solver", NULL, NULL);
 
     // Make the window's context current
     glfwMakeContextCurrent(window);
 
-    // Initialize dear ImGUI and ImPlot
+    // Initialize dear ImGUI
     ImGui::CreateContext();
+    glClearColor(.1f, .1f, .1f, 1.0f);
+    
     ImGuiIO& io = ImGui::GetIO(); (void)io;
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    //io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+
     ImGui::StyleColorsDark();
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 330");
 
-    // Plotting
+
+    // Initialize ImPlot
     ImPlot::CreateContext();
 
     // Main loop
@@ -35,13 +42,14 @@ int main()
     {
         // Poll for events
         glfwPollEvents();
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // Start a new dear ImGUI frame
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-
+        // Draw ImGUI
         ImGui::Begin("Window Here");
         ImGui::Text("Dis tsome text");
         
@@ -62,12 +70,15 @@ int main()
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
+        // Multi-Viewport
+        ImGui::UpdatePlatformWindows();
+        ImGui::RenderPlatformWindowsDefault();
+
         // Swap buffers
         glfwSwapBuffers(window);
     }
 
     // Clean up
-    //ImPlot::DestroyContext();
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
