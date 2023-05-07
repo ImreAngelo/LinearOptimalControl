@@ -5,8 +5,42 @@
 #include "implot.h"
 
 #include "PlotFrame.h"
+#include "Color.h"
 
 using namespace Rendering;
+
+void temp(Window* w)
+{
+    ImGui::Begin("Main Window");
+
+    //ImGui::BeginGroup();
+    //if (ImGui::Button("Save"))
+    //{
+    //    //... my_code 
+    //}
+    //ImGui::SameLine();
+    //if (ImGui::Button("Cancel"))
+    //{
+    //    //... my_code 
+    //}
+    //ImGui::EndGroup();
+
+    ImGui::BeginGroup();
+    ImGui::PushStyleColor(ImGuiCol_Button, Color::BACKGROUND);
+
+    if (ImGui::Button("Problem 1")) {
+
+    }
+
+    //if (ImGui::Button("Problem 2")) { }
+    //if (ImGui::Button("Problem 3")) { }
+
+    ImGui::PopStyleColor();
+    ImGui::EndGroup();
+
+    //ImGui::Text("More text");
+    ImGui::End();
+}
 
 void Window::update()
 {
@@ -21,16 +55,12 @@ void Window::update()
     ImGui::NewFrame();
 
     // Draw ImGUI - TODO: Show all windows from list
-    ImGui::Begin("Window Here");
-    ImGui::Text("Dis tsome text");
-
-    PlotFrame frame;
-    frame.drawPlot("Plot");
-
-    ImGui::Text("More text");
+    temp(this);
+    PlotFrame frame1, frame2;
+    frame1.drawPlot("Plot 1");
+    frame2.drawPlot("Plot 2");
 
     // Render dear ImGUI
-    ImGui::End();
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
@@ -61,9 +91,7 @@ Window::Window(const char* title, bool showWindow)
 
     // Initialize dear ImGUI
     ImGui::CreateContext();
-    PlotFrame temp;
-    auto colors = temp.colors;
-    glClearColor(colors.bk.x, colors.bk.y, colors.bk.z, colors.bk.w);
+    glClearColor(Color::BACKGROUND.x, Color::BACKGROUND.y, Color::BACKGROUND.z, Color::BACKGROUND.w);
 
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;

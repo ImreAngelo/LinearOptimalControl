@@ -6,7 +6,6 @@ extern struct GLFWwindow;
 
 /** TODO:
  * - Use custom title bar /w close & minimize (hide native)
- * - C++ify color (make macros into const_expr in new file)
  */
 
 namespace Rendering

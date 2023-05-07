@@ -113,5 +113,8 @@
     <ClInclude Include="PlotFrame.h">
       <Filter>Header Files\rendering</Filter>
     </ClInclude>
+    <ClInclude Include="Color.h">
+      <Filter>Header Files\rendering</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

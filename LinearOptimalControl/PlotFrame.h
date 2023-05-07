@@ -1,11 +1,9 @@
 #pragma once
 #include <implot.h>
-#include <math.h>
 #include "Window.h"
-
-#define DIVIDE(v) v/((float)255)
-#define FROM_RGB(r,g,b) DIVIDE(r),DIVIDE(g),DIVIDE(b),1
-#define COLOR(name,r,g,b) ImVec4 name{FROM_RGB(r,g,b)}
+#include "Color.h"
+#include <vector>
+#include <math.h>
 
 namespace Rendering
 {
@@ -15,41 +13,48 @@ namespace Rendering
 	class PlotFrame
 	{
     public:
-        struct {
-            COLOR(bk, 26, 26, 26);
-            COLOR(fg, 0, 10, 21);
-            COLOR(dynamic, 250, 10, 31);
-            COLOR(control, 10, 250, 31);
-        } colors;
-
-    public:
         void drawPlot(const char* windowName)
         {
-            if (ImPlot::BeginPlot(windowName))
-            {
-                // Plot a line graph
-                float data_control[100];
-                float data_dynamic[100];
-                for (int i = 0; i < 100; i++) {
-                    data_control[i] = sin(i * 0.1f);
-                    data_dynamic[i] = cos(i * 0.1f);
-                }
+            ImGui::Begin(windowName);
 
-                ImPlot::PushStyleColor(ImPlotCol_Line, colors.dynamic);
-                ImPlot::PlotLine("Dynamic", data_dynamic, 100);
-                ImPlot::PopStyleColor();
-    
-                /*ImGui::PushStyleColor(ImGuiCol_FrameBg, colors.fg);
-                ImGui::PushStyleColor(ImGuiCol_Text, colors.control);
-                */
-                ImPlot::PushStyleColor(ImPlotCol_Line, colors.control);
-                ImPlot::PlotLine("Control", data_control, 100);
-                ImPlot::PopStyleColor();
-                /*ImGui::PopStyleColor();
-                ImGui::PopStyleColor();*/
-
-                ImPlot::EndPlot();
+            if (!ImPlot::BeginPlot(windowName))
+                return;
+            
+            // Plot a line graph
+            float data_control[100];
+            float data_dynamic[100];
+            for (int i = 0; i < 100; i++) {
+                data_control[i] = sin(i * 0.1f);
+                data_dynamic[i] = cos(i * 0.1f);
             }
+
+            ImPlot::PushStyleColor(ImPlotCol_Line, Color::DYNAMIC);
+            ImPlot::PlotLine("Dynamic", data_dynamic, 100);
+            ImPlot::PopStyleColor();
+            
+            ImPlot::PushStyleColor(ImPlotCol_Line, Color::CONTROL);
+            ImPlot::PlotLine("Control", data_control, 100);
+            ImPlot::PopStyleColor();
+
+            ImPlot::EndPlot();
+            ImGui::End();
         }
+
+        void render() {};
+
+        PlotFrame(std::vector<double> control, std::vector<double> dynamic)
+            : control(control), dynamic(dynamic)
+        {
+
+        }
+
+        PlotFrame()
+        {
+            // For debugging
+        }
+    
+    private:
+        std::vector<double> control, dynamic;
 	};
+
 }

@@ -167,6 +167,7 @@
     <ClInclude Include="..\Dependencies\imgui\imstb_truetype.h" />
     <ClInclude Include="..\Dependencies\implot\implot.h" />
     <ClInclude Include="..\Dependencies\implot\implot_internal.h" />
+    <ClInclude Include="Color.h" />
     <ClInclude Include="LinearProgram.h" />
     <ClInclude Include="PlotFrame.h" />
     <ClInclude Include="Window.h" />
