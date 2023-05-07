@@ -25,6 +25,12 @@
     <Filter Include="Source Files\implot">
       <UniqueIdentifier>{160da053-d905-4639-bb3f-6e34c5d4acdd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\rendering">
+      <UniqueIdentifier>{b6eea3e6-17ab-4c57-af41-ce42910e63a3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\rendering">
+      <UniqueIdentifier>{30d8ac30-85cc-4d51-ab8c-6b6c8bf14793}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -57,8 +63,14 @@
     <ClCompile Include="..\Dependencies\implot\implot_items.cpp">
       <Filter>Source Files\implot</Filter>
     </ClCompile>
-    <ClCompile Include="Window.cpp">
+    <ClCompile Include="LinearProgram.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Window.cpp">
+      <Filter>Source Files\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="PlotFrame.cpp">
+      <Filter>Source Files\rendering</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -92,8 +104,14 @@
     <ClInclude Include="..\Dependencies\implot\implot.h">
       <Filter>Header Files\implot</Filter>
     </ClInclude>
-    <ClInclude Include="Window.h">
+    <ClInclude Include="LinearProgram.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Window.h">
+      <Filter>Header Files\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="PlotFrame.h">
+      <Filter>Header Files\rendering</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

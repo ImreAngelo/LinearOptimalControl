@@ -1,4 +1,12 @@
 #include "Window.h"
+#include <GLFW/glfw3.h>
+#include "backends/imgui_impl_glfw.h"
+#include "backends/imgui_impl_opengl3.h"
+#include "implot.h"
+
+#include "PlotFrame.h"
+
+using namespace Rendering;
 
 void Window::update()
 {
@@ -12,16 +20,17 @@ void Window::update()
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    // Draw ImGUI
+    // Draw ImGUI - TODO: Show all windows from list
     ImGui::Begin("Window Here");
     ImGui::Text("Dis tsome text");
 
-    drawPlot("Plot 1");
-    drawPlot("Plot 2");
+    PlotFrame frame;
+    frame.drawPlot("Plot");
 
-    ImGui::End();
+    ImGui::Text("More text");
 
     // Render dear ImGUI
+    ImGui::End();
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
@@ -39,7 +48,8 @@ bool Window::shouldClose()
 }
 
 Window::Window(const char* title, bool showWindow)
-{// Initialize GLFW
+{
+    // Initialize GLFW
     glfwInit();
 
     // Create a window
@@ -51,11 +61,14 @@ Window::Window(const char* title, bool showWindow)
 
     // Initialize dear ImGUI
     ImGui::CreateContext();
-    glClearColor(.1f, .1f, .1f, 1.0f);
+    PlotFrame temp;
+    auto colors = temp.colors;
+    glClearColor(colors.bk.x, colors.bk.y, colors.bk.z, colors.bk.w);
 
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-    //io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+    if(!showWindow)
+        io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
     ImGui::StyleColorsDark();
     ImGui_ImplGlfw_InitForOpenGL(window, true);
