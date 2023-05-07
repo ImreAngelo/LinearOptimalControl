@@ -1,6 +1,6 @@
 #include <Windows.h>
 #include <thread>
-#include "Window.h"
+#include "Application.h"
 
 int main()
 {
@@ -8,7 +8,7 @@ int main()
     ShowWindow(GetConsoleWindow(), SW_HIDE);
 
     // Draw UI on main thread
-    Rendering::Window window("Linear Optimal Control Solver");
+    Rendering::Application window("Linear Optimal Control Solver");
     while (!window.shouldClose()) {
         window.update();
     }

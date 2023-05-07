@@ -1,4 +1,4 @@
-#include "Window.h"
+#include "Application.h"
 #include <GLFW/glfw3.h>
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
@@ -9,7 +9,7 @@
 
 using namespace Rendering;
 
-void temp(Window* w)
+void temp(Application* w)
 {
     ImGui::Begin("Main Window");
 
@@ -42,7 +42,7 @@ void temp(Window* w)
     ImGui::End();
 }
 
-void Window::update()
+void Application::update()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -72,12 +72,12 @@ void Window::update()
     glfwSwapBuffers(window);
 }
 
-bool Window::shouldClose()
+bool Application::shouldClose()
 {
     return glfwWindowShouldClose(window);
 }
 
-Window::Window(const char* title, bool showWindow)
+Application::Application(const char* title, bool showWindow)
 {
     // Initialize GLFW
     glfwInit();
@@ -106,7 +106,7 @@ Window::Window(const char* title, bool showWindow)
     ImPlot::CreateContext();
 }
 
-Window::~Window()
+Application::~Application()
 {
     // Clean up
     ImGui_ImplOpenGL3_Shutdown();

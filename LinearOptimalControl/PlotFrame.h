@@ -1,6 +1,5 @@
 #pragma once
 #include <implot.h>
-#include "Window.h"
 #include "Color.h"
 #include <vector>
 #include <math.h>

@@ -154,7 +154,7 @@
     <ClCompile Include="LinearProgram.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="PlotFrame.cpp" />
-    <ClCompile Include="Window.cpp" />
+    <ClCompile Include="Application.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Dependencies\imgui\backends\imgui_impl_glfw.h" />
@@ -170,7 +170,7 @@
     <ClInclude Include="Color.h" />
     <ClInclude Include="LinearProgram.h" />
     <ClInclude Include="PlotFrame.h" />
-    <ClInclude Include="Window.h" />
+    <ClInclude Include="Application.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

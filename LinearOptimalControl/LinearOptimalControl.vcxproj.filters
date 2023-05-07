@@ -66,7 +66,7 @@
     <ClCompile Include="LinearProgram.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Window.cpp">
+    <ClCompile Include="Application.cpp">
       <Filter>Source Files\rendering</Filter>
     </ClCompile>
     <ClCompile Include="PlotFrame.cpp">
@@ -107,7 +107,7 @@
     <ClInclude Include="LinearProgram.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Window.h">
+    <ClInclude Include="Application.h">
       <Filter>Header Files\rendering</Filter>
     </ClInclude>
     <ClInclude Include="PlotFrame.h">

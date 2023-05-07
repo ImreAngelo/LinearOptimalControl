@@ -13,7 +13,7 @@ namespace Rendering
     /// <summary>
     /// Creates an application window
     /// </summary>
-    class Window
+    class Application
     {
     public:
         /// <summary>
@@ -32,12 +32,15 @@ namespace Rendering
         /// </summary>
         /// <param name="title">Name of the window</param>
         /// <param name="showWindow">Experimental</param>
-        Window(const char* title, bool show = true);
+        Application(const char* title, bool show = true);
 
-        ~Window();
+        ~Application();
 
     private:
         GLFWwindow* window;
+
+        // list of windows to render
+        // main window
     };
 }
 
