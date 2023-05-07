@@ -152,6 +152,7 @@
     <ClCompile Include="..\Dependencies\implot\implot.cpp" />
     <ClCompile Include="..\Dependencies\implot\implot_items.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Dependencies\imgui\backends\imgui_impl_glfw.h" />
@@ -164,6 +165,7 @@
     <ClInclude Include="..\Dependencies\imgui\imstb_truetype.h" />
     <ClInclude Include="..\Dependencies\implot\implot.h" />
     <ClInclude Include="..\Dependencies\implot\implot_internal.h" />
+    <ClInclude Include="Window.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
