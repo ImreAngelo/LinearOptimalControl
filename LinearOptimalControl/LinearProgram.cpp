@@ -1,59 +1,35 @@
 #include "LinearProgram.h"
-#include <ilcplex/ilocplex.h>
 #include <Eigen/Core>
 
 template <typename T>
 using Matrix = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>;
+template <typename T>
+using RowVec = Eigen::Matrix<T, Eigen::Dynamic, 1>;
 
-void LinearProgram::solve(double t0, double t1, size_t n)
+IloNumExprArg buildObjective(Matrix<IloNum> phi0, RowVec<IloNum> phi1, RowVec<IloNum> phi2, Matrix<IloNumVar> y)
 {
-	float dt = ((t1 - t0) / n);
-    
-    dynamics = std::vector<double>(n);
-    control = std::vector<double>(n);
-	
-	IloEnv env;
-	IloModel model(env);
+    assert(phi0.cols() == y.rows());
+    assert(phi1.rows() == y.cols());
+    assert(phi2.rows() == y.cols());
 
-	IloNumVarArray u(env, n, 0.0, 1.0);
-	IloNumVarArray y(env, n, DBL_MIN, DBL_MAX);
+    IloNumExprArg obj = y(0,0) - y(0,0);
 
-    // Constraint on each point u_i (Eulers method)
-    for (auto i = 0; i < n - 1; i++) {
-        auto t = i * dt + t0;
-        model.add(y[i + 1] == y[i] + dt * (-0.8f * u[i]));
-    }
-
-    // Objective = Integral of y
-    IloNumExprArg obj = u[n - 1].asNumExpr();
-    for (auto i = 0; i < n; i++)
-        obj = obj + (y[i] / 2);
-
-    model.add(IloMinimize(env, obj));
-
-    // Initial value
-    model.add(y[0] == 1);
-
-	try {   
-        // Solve
-        IloCplex cplex(model);
-        cplex.solve();
-
-        for (auto i = 0; i < n; i++) {
-             control[i] = cplex.getValue(u[i]);
-            dynamics[i] = cplex.getValue(y[i]);
+    // TODO: Integrate y properly
+    // TODO: Include phi1 * y(0) + phi2 * y(end)
+    for (auto i = 0; i < y.rows(); i++) {
+        for (auto j = 0; j < y.cols(); j++) {
+            for (auto r = 0; r < y.rows(); r++) {
+                obj = obj + phi0(i, r) * y(r, j); // * exp(0)
+            }
         }
     }
-    catch (IloException& e) {
-        std::cerr << "Concert exception caught: " << e << std::endl;
-    }
-    catch(...) {
-        std::cerr << "An unknown error occured.";
-    }
+
+    return obj;
 }
 
+
 // TODO: u_steps, y_steps optional
-void LinearProgram::solve_mat(double t0, double t1, size_t steps, size_t dim)
+bool LinearProgram::solve(double t0, double t1, size_t steps, size_t dim)
 {
     // assert(n == phi.size());
 
@@ -65,9 +41,10 @@ void LinearProgram::solve_mat(double t0, double t1, size_t steps, size_t dim)
     // Populate matrices
     Matrix<IloNumVar> u(dim, steps);
     Matrix<IloNumVar> y(dim, steps);
+
     for (auto j = 0; j < steps; j++) {   // Col
         for (auto i = 0; i < dim; i++) { // Row
-            u(i, j) = IloNumVar(env, 0.0, 1.0);
+            u(i, j) = IloNumVar(env, -1.0, 1.0);
             y(i, j) = IloNumVar(env, DBL_MIN, DBL_MAX);
         }
     }
@@ -81,14 +58,14 @@ void LinearProgram::solve_mat(double t0, double t1, size_t steps, size_t dim)
     }
 
     // Build objective function
-    IloNumExprArg obj = y(0, 0);
-    for (auto j = 0; j < steps; j++) {
-        for (auto i = 0; i < dim; i++) {
-            obj = obj + y(i, j);
-        }
-    }
+    // TODO: Pass as (optional) parameter
+    Matrix<IloNum> phi[3] = {
+        Matrix<IloNum>::Constant(steps, dim, 1.0),  // integral of y(t)
+        Matrix<IloNum>::Constant(steps, 1, 0.0),    // y(t0)
+        Matrix<IloNum>::Constant(steps, 1, 1.0),    // y(t1)
+    };
 
-    model.add(IloMinimize(env, obj - y(0, 0)));
+    model.add(IloMinimize(env, buildObjective(phi[0], phi[1], phi[2], y)));
 
     // Add boundary conditions
     model.add(y(0, 0) == 1);
@@ -105,6 +82,8 @@ void LinearProgram::solve_mat(double t0, double t1, size_t steps, size_t dim)
             control[j] = cplex.getValue(u(0, j));
             dynamics[j] = cplex.getValue(y(0, j));
         }
+
+        return true;
     }
     catch (IloException& e) {
         std::cerr << "Concert exception caught: " << e << std::endl;
@@ -112,4 +91,6 @@ void LinearProgram::solve_mat(double t0, double t1, size_t steps, size_t dim)
     catch (...) {
         std::cerr << "An unknown error occured.";
     }
+
+    return false;
 }
