@@ -72,6 +72,9 @@
     <ClCompile Include="PlotFrame.cpp">
       <Filter>Source Files\rendering</Filter>
     </ClCompile>
+    <ClCompile Include="MainWindow.cpp">
+      <Filter>Source Files\rendering</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Dependencies\imgui\imgui.h">
@@ -114,6 +117,12 @@
       <Filter>Header Files\rendering</Filter>
     </ClInclude>
     <ClInclude Include="Color.h">
+      <Filter>Header Files\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="MainWindow.h">
+      <Filter>Header Files\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Window.h">
       <Filter>Header Files\rendering</Filter>
     </ClInclude>
   </ItemGroup>

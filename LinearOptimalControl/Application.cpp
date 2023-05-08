@@ -4,43 +4,11 @@
 #include "backends/imgui_impl_opengl3.h"
 #include "implot.h"
 
+#include "MainWindow.h"
 #include "PlotFrame.h"
 #include "Color.h"
 
 using namespace Rendering;
-
-void temp(Application* w)
-{
-    ImGui::Begin("Main Window");
-
-    //ImGui::BeginGroup();
-    //if (ImGui::Button("Save"))
-    //{
-    //    //... my_code 
-    //}
-    //ImGui::SameLine();
-    //if (ImGui::Button("Cancel"))
-    //{
-    //    //... my_code 
-    //}
-    //ImGui::EndGroup();
-
-    ImGui::BeginGroup();
-    ImGui::PushStyleColor(ImGuiCol_Button, Color::BACKGROUND);
-
-    if (ImGui::Button("Problem 1")) {
-
-    }
-
-    //if (ImGui::Button("Problem 2")) { }
-    //if (ImGui::Button("Problem 3")) { }
-
-    ImGui::PopStyleColor();
-    ImGui::EndGroup();
-
-    //ImGui::Text("More text");
-    ImGui::End();
-}
 
 void Application::update()
 {
@@ -54,11 +22,12 @@ void Application::update()
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    // Draw ImGUI - TODO: Show all windows from list
-    temp(this);
-    PlotFrame frame1, frame2;
-    frame1.drawPlot("Plot 1");
-    frame2.drawPlot("Plot 2");
+    // Draw all windows
+    mainWindow->render();
+    /*
+    for (auto& w : windows)
+        w.render();
+    */
 
     // Render dear ImGUI
     ImGui::Render();
@@ -95,8 +64,8 @@ Application::Application(const char* title, bool showWindow)
 
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-    if(!showWindow)
-        io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+    //if(!showWindow)
+    //io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
     ImGui::StyleColorsDark();
     ImGui_ImplGlfw_InitForOpenGL(window, true);
@@ -104,6 +73,10 @@ Application::Application(const char* title, bool showWindow)
 
     // Initialize ImPlot
     ImPlot::CreateContext();
+
+    // Make main window
+    mainWindow = new MainWindow();
+    //windows.emplace_back(PlotFrame("plot 1"));
 }
 
 Application::~Application()
@@ -114,4 +87,6 @@ Application::~Application()
     ImGui::DestroyContext();
 
     glfwTerminate();
+
+    delete mainWindow;
 }

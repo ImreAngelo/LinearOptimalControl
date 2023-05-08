@@ -1,4 +1,5 @@
 #pragma once
+#include "Window.h"
 #include <implot.h>
 #include "Color.h"
 #include <vector>
@@ -9,51 +10,30 @@ namespace Rendering
 	/// <summary>
 	/// Plots the dynamic/control of the problem in a single dimension
 	/// </summary>
-	class PlotFrame
+	class PlotFrame : public Window
 	{
     public:
-        void drawPlot(const char* windowName)
-        {
-            ImGui::Begin(windowName);
+        virtual void render() override;
 
-            if (!ImPlot::BeginPlot(windowName))
-                return;
-            
-            // Plot a line graph
-            float data_control[100];
-            float data_dynamic[100];
-            for (int i = 0; i < 100; i++) {
-                data_control[i] = sin(i * 0.1f);
-                data_dynamic[i] = cos(i * 0.1f);
-            }
+        PlotFrame(const char* title, std::vector<double> control, std::vector<double> dynamic)
+            : windowName(title), control(control), dynamic(dynamic) { }
 
-            ImPlot::PushStyleColor(ImPlotCol_Line, Color::DYNAMIC);
-            ImPlot::PlotLine("Dynamic", data_dynamic, 100);
-            ImPlot::PopStyleColor();
-            
-            ImPlot::PushStyleColor(ImPlotCol_Line, Color::CONTROL);
-            ImPlot::PlotLine("Control", data_control, 100);
-            ImPlot::PopStyleColor();
-
-            ImPlot::EndPlot();
-            ImGui::End();
-        }
-
-        void render() {};
-
-        PlotFrame(std::vector<double> control, std::vector<double> dynamic)
-            : control(control), dynamic(dynamic)
-        {
-
-        }
-
-        PlotFrame()
+        PlotFrame(const char* title)
+            : windowName(title)
         {
             // For debugging
+            control.reserve(100);
+            dynamic.reserve(100);
+
+            for (int i = 0; i < 100; i++) {
+                control.emplace_back(sin(i * .1f));
+                dynamic.emplace_back(.9f*cos(i * .075f));
+            }
         }
     
     private:
         std::vector<double> control, dynamic;
+        const char* windowName;
 	};
 
 }

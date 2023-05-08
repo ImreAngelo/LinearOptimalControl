@@ -109,16 +109,19 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\imgui;$(SolutionDir)Dependencies\implot;$(SolutionDir)Dependencies\glfw\include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\imgui;$(SolutionDir)Dependencies\implot;$(SolutionDir)Dependencies\glfw\include;$(SolutionDir)\Dependencies\eigen;$(SolutionDir)\Dependencies\cplex\include;$(SolutionDir)\Dependencies\concert\include;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\glfw\lib-vc2022</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glfw3.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\glfw\lib-vc2022;$(SolutionDir)Dependencies\cplex\lib\x64_windows_msvc14\stat_mdd;$(SolutionDir)Dependencies\concert\lib\x64_windows_msvc14\stat_mdd;</AdditionalLibraryDirectories>
+      <AdditionalDependencies>cplex2211.lib;ilocplex.lib;concert.lib;opengl32.lib;glfw3.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
       <EntryPointSymbol>
       </EntryPointSymbol>
     </Link>
+    <PostBuildEvent>
+      <Command>copy /Y "$(SolutionDir)Dependencies\cplex\bin\x64_win64\cplex2211.dll" "$(TargetDir)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -128,18 +131,21 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\imgui;$(SolutionDir)Dependencies\implot;$(SolutionDir)Dependencies\glfw\include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\imgui;$(SolutionDir)Dependencies\implot;$(SolutionDir)Dependencies\glfw\include;$(SolutionDir)\Dependencies\eigen;$(SolutionDir)\Dependencies\cplex\include;$(SolutionDir)\Dependencies\concert\include;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\glfw\lib-vc2022</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glfw3.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\glfw\lib-vc2022;$(SolutionDir)Dependencies\cplex\lib\x64_windows_msvc14\stat_mda;$(SolutionDir)Dependencies\concert\lib\x64_windows_msvc14\stat_mda;</AdditionalLibraryDirectories>
+      <AdditionalDependencies>cplex2211.lib;ilocplex.lib;concert.lib;opengl32.lib;glfw3.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
       <EntryPointSymbol>
       </EntryPointSymbol>
     </Link>
+    <PostBuildEvent>
+      <Command>copy /Y "$(SolutionDir)Dependencies\cplex\bin\x64_win64\cplex2211.dll" "$(TargetDir)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\Dependencies\imgui\backends\imgui_impl_glfw.cpp" />
@@ -153,6 +159,7 @@
     <ClCompile Include="..\Dependencies\implot\implot_items.cpp" />
     <ClCompile Include="LinearProgram.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MainWindow.cpp" />
     <ClCompile Include="PlotFrame.cpp" />
     <ClCompile Include="Application.cpp" />
   </ItemGroup>
@@ -169,8 +176,10 @@
     <ClInclude Include="..\Dependencies\implot\implot_internal.h" />
     <ClInclude Include="Color.h" />
     <ClInclude Include="LinearProgram.h" />
+    <ClInclude Include="MainWindow.h" />
     <ClInclude Include="PlotFrame.h" />
     <ClInclude Include="Application.h" />
+    <ClInclude Include="Window.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

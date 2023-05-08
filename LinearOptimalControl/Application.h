@@ -1,13 +1,14 @@
 #pragma once
 
 #include "imgui.h"
+#include "Window.h"
+#include <vector>
 
-extern struct GLFWwindow;
+struct GLFWwindow;
 
 /** TODO:
  * - Use custom title bar /w close & minimize (hide native)
  */
-
 namespace Rendering
 {
     /// <summary>
@@ -39,8 +40,8 @@ namespace Rendering
     private:
         GLFWwindow* window;
 
-        // list of windows to render
-        // main window
+        Rendering::Window* mainWindow;
+        //std::vector<Rendering::Window> windows;
     };
 }
 

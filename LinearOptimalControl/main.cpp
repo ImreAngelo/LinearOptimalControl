@@ -1,5 +1,4 @@
 #include <Windows.h>
-#include <thread>
 #include "Application.h"
 
 int main()
@@ -12,8 +11,6 @@ int main()
     while (!window.shouldClose()) {
         window.update();
     }
-
-    // 
 
 	return 0;
 }
