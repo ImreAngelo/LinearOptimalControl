@@ -4,7 +4,7 @@
 int main()
 {
     // Hide console
-    ShowWindow(GetConsoleWindow(), SW_HIDE);
+    ShowWindow(GetConsoleWindow(), SW_SHOW);
 
     // Draw UI on main thread
     Rendering::Application window("Linear Optimal Control Solver");
