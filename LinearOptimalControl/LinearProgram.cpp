@@ -1,38 +1,48 @@
 #include "LinearProgram.h"
 #include <Eigen/Core>
+#include "Matrix.h"
 
 template <typename T>
 using Matrix = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>;
 template <typename T>
 using RowVec = Eigen::Matrix<T, Eigen::Dynamic, 1>;
 
-IloNumExprArg buildObjective(Matrix<IloNum> phi0, RowVec<IloNum> phi1, RowVec<IloNum> phi2, Matrix<IloNumVar> y)
+/// <summary>
+/// Build objective from integral, start and end weights
+/// </summary>
+/// <param name="phi0"></param>
+/// <param name="phi1"></param>
+/// <param name="phi2"></param>
+/// <param name="y"></param>
+/// <returns></returns>
+inline IloNumExprArg buildObjective(Matrix<IloNum> phi0, RowVec<IloNum> phi1, RowVec<IloNum> phi2, Matrix<IloNumVar> y)
 {
-    assert(phi0.cols() == y.rows());
-    assert(phi1.rows() == y.cols());
-    assert(phi2.rows() == y.cols());
-
-    IloNumExprArg obj = y(0,0) - y(0,0);
-
-    // TODO: Integrate y properly
-    // TODO: Include phi1 * y(0) + phi2 * y(end)
-    for (auto i = 0; i < y.rows(); i++) {
-        for (auto j = 0; j < y.cols(); j++) {
-            for (auto r = 0; r < y.rows(); r++) {
-                obj = obj + phi0(i, r) * y(r, j); // * exp(0)
-            }
-        }
-    }
-
+    IloNumExprArg obj = MatrixUtil::mulSum(phi0, y);
     return obj;
 }
 
+/// <summary>
+/// 
+/// </summary>
+/// <param name="model"></param>
+void RKDiscretize(IloModel& model, Matrix<IloNum> Fy, Matrix<IloNum> Fu, Matrix<IloNumVar> y, Matrix<IloNumVar> u, double dt, double t0 = 0)
+{
+    const size_t n = y.rows();
+    const size_t m = y.cols();
+
+    for (auto j = 0; j < m - 1; j++) {
+        auto t = j * dt + t0;
+        for (auto i = 0; i < n; i++) {
+            auto Cu = MatrixUtil::mul(Fu.row(j), u.col(j)).sum();
+
+            model.add(y(i, j + 1) == y(i, j) + dt * (0 + 0 * y(0, j) + Cu));
+        }
+    }
+}
 
 // TODO: u_steps, y_steps optional
 bool LinearProgram::solve(double t0, double t1, size_t steps, size_t dim)
 {
-    // assert(n == phi.size());
-
     double dt = ((t1 - t0) / steps);
 
     IloEnv env;
@@ -50,12 +60,12 @@ bool LinearProgram::solve(double t0, double t1, size_t steps, size_t dim)
     }
 
     // Discretize
-    for (auto j = 0; j < steps - 1; j++) {
-        auto t = j * dt + t0;
-        for (auto i = 0; i < dim; i++) {
-            model.add(y(i, j + 1) == y(i,j) + dt * (0 + 0 * y(0, j) - 1 * u(0, j)));
-        }
-    }
+    Matrix<IloNum> F[3] = {
+        Matrix<IloNum>::Constant(steps, dim, 1.0),      // F_y(t)
+        Matrix<IloNum>::Constant(steps, dim, -1.0),     // F_u(t)
+    };
+
+    RKDiscretize(model, F[0], F[1], y, u, dt, t0);
 
     // Build objective function
     // TODO: Pass as (optional) parameter
