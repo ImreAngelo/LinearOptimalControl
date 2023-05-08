@@ -31,11 +31,13 @@ void RKDiscretize(IloModel& model, Matrix<IloNum> Fc, Matrix<IloNum> Fy, Matrix<
     for (auto j = 0; j < m - 1; j++) {
         auto t = j * dt + t0;
         for (auto i = 0; i < n; i++) {
-            auto _c = Fc(0,j);
+            /*
+            auto _c = Fc(0, j);
+            */
             auto _y = MatrixUtil::dot(Fy.row(j), y.col(j));
             auto _u = MatrixUtil::dot(Fu.row(j), u.col(j));
 
-            model.add(y(i, j + 1) == y(i, j) + dt * (_c + _y + _u));
+            model.add(y(i, j + 1) == y(i, j) + dt * (_y + _u));
         }
     }
 }
@@ -61,12 +63,12 @@ bool LinearProgram::solve(double t0, double t1, size_t steps, size_t dim)
 
     // Discretize
     Matrix<IloNum> F[3] = {
-        Matrix<IloNum>::Constant(steps, dim, 0.0),      // F_c(t)
+        Matrix<IloNum>::Constant(steps, dim, 1.0),      // F_c(t)
         Matrix<IloNum>::Constant(steps, dim, 0.0),      // F_y(t)
         Matrix<IloNum>::Constant(steps, dim, -1.0),     // F_u(t)
     };
 
-    RKDiscretize(model, F[0], F[0], F[1], y, u, dt, t0);
+    RKDiscretize(model, F[0], F[1], F[2], y, u, dt, t0);
 
     // Build objective function
     // TODO: Pass as (optional) parameter
