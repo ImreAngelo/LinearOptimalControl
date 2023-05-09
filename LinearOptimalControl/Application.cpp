@@ -22,6 +22,9 @@ void Application::update()
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
+    // Dockspace
+    ImGui::DockSpaceOverViewport();
+
     // Draw all windows
     mainWindow->render();
     /*
@@ -53,7 +56,8 @@ Application::Application(const char* title, bool showWindow)
 
     // Create a window
     glfwWindowHint(GLFW_VISIBLE, showWindow);
-    window = glfwCreateWindow(1920, 1080, title, NULL, NULL);
+    glfwWindowHint(GLFW_SCALE_TO_MONITOR, GLFW_TRUE);
+    window = glfwCreateWindow(1280, 720, title, NULL, NULL);
 
     // Make the window's context current
     glfwMakeContextCurrent(window);

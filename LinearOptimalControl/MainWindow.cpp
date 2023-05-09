@@ -10,21 +10,21 @@ void Rendering::MainWindow::render()
     ImGui::PushStyleColor(ImGuiCol_Button, Color::BACKGROUND);
 
     if (ImGui::Button("Problem 1")) {
-        lp.solve(0, 2, 20, 1);
+        lp.solve(0, 2, 20);
         frame = PlotFrame("Example 1", lp.getControl(), lp.getDynamics());
         show = true;
     }
 
     ImGui::SameLine();
     if (ImGui::Button("Problem 2")) {
-        lp.solve(0, 2, 40, 1);
+        lp.solve(0, 2, 200);
         frame = PlotFrame("Example 2", lp.getControl(), lp.getDynamics());
         show = true;
     }
 
     ImGui::SameLine();
     if (ImGui::Button("Problem 3")) {
-        lp.solve(0, 1, 50, 1);
+        lp.solve(0, 1, 50);
         frame = PlotFrame("Example 3", lp.getControl(), lp.getDynamics());
         show = true;
     }

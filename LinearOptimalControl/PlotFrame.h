@@ -3,10 +3,13 @@
 #include <implot.h>
 #include "Color.h"
 #include <vector>
+#include <string>
 #include <math.h>
 
 namespace Rendering
 {
+    using std::string;
+
 	/// <summary>
 	/// Plots the dynamic/control of the problem in a single dimension
 	/// </summary>
@@ -15,11 +18,11 @@ namespace Rendering
     public:
         virtual void render() override;
 
-        PlotFrame(const char* title, std::vector<double> control, std::vector<double> dynamic)
-            : windowName(title), control(control), dynamic(dynamic) { }
+        PlotFrame(string&& title, std::vector<double> control, std::vector<double> dynamic)
+            : windowName(std::move(title)), control(control), dynamic(dynamic) { }
 
-        PlotFrame(const char* title)
-            : windowName(title)
+        PlotFrame(string&& title)
+            : windowName(std::move(title))
         {
             // For debugging
             control.reserve(100);
@@ -30,10 +33,10 @@ namespace Rendering
                 dynamic.emplace_back(.9f*cos(i * .075f));
             }
         }
-    
+
     private:
         std::vector<double> control, dynamic;
-        const char* windowName;
+        string windowName;
 	};
 
 }

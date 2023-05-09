@@ -12,7 +12,7 @@ namespace Rendering
 
 	private:
 		LinearProgram lp{};
-		PlotFrame frame{ "DEBUG" };
+		PlotFrame frame{"d"};
 		bool show = false;
 	};
 }

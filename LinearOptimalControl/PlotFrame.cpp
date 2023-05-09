@@ -2,7 +2,7 @@
 
 void Rendering::PlotFrame::render()
 {
-    ImGui::Begin(windowName);
+    ImGui::Begin(windowName.c_str());
 
     if (ImPlot::BeginPlot("Control"))
     {

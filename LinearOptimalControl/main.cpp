@@ -12,9 +12,6 @@ int main()
 #ifdef _WIN32
     // Hide console
     ShowWindow(GetConsoleWindow(), SW_HIDE);
-#elif __APPLE__
-    throw "Not supported";
-    return 0;
 #endif // _WIN32
 #endif // _DEBUG
 
