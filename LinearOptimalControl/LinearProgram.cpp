@@ -6,20 +6,6 @@ template<typename T>
 using Matrix = MatrixUtil::Matrix<T>;
 
 /// <summary>
-/// Build objective from integral, start and end weights
-/// </summary>
-/// <param name="phi0"></param>
-/// <param name="phi1"></param>
-/// <param name="phi2"></param>
-/// <param name="y"></param>
-/// <returns></returns>
-//inline IloNumExprArg buildObjective(Matrix<IloNum> phi0, RowVec<IloNum> phi1, RowVec<IloNum> phi2, Matrix<IloNumVar> y)
-//{
-//    IloNumExprArg obj = MatrixUtil::mulSum(phi0, y);
-//    return obj;
-//}
-
-/// <summary>
 /// 
 /// </summary>
 /// <param name="model"></param>
