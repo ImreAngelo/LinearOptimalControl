@@ -18,11 +18,11 @@ namespace Rendering
     public:
         virtual void render() override;
 
-        PlotFrame(string&& title, std::vector<double> control, std::vector<double> dynamic)
-            : windowName(std::move(title)), control(control), dynamic(dynamic) { }
+        PlotFrame(string&& title, double t0, double t1, std::vector<double> control, std::vector<double> dynamic)
+            : windowName(std::move(title)), t0(t0), t1(t1), control(control), dynamic(dynamic) { }
 
         PlotFrame(string&& title)
-            : windowName(std::move(title))
+            : windowName(std::move(title)), t0(0), t1(1)
         {
             // For debugging
             control.reserve(100);
@@ -37,6 +37,7 @@ namespace Rendering
     private:
         std::vector<double> control, dynamic;
         string windowName;
+        double t0, t1;
 	};
 
 }

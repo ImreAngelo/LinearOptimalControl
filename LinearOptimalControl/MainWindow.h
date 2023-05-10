@@ -1,6 +1,5 @@
 #pragma once
 #include "Window.h"
-#include "LinearProgram.h"
 #include "PlotFrame.h"
 
 namespace Rendering
@@ -11,7 +10,7 @@ namespace Rendering
 		virtual void render() override;
 
 	private:
-		LinearProgram lp{};
+		//LinearProgram lp{};
 		PlotFrame frame{"d"};
 		bool show = false;
 	};

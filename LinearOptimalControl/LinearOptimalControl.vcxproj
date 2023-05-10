@@ -120,6 +120,7 @@
       <AdditionalDependencies>cplex2211.lib;ilocplex.lib;concert.lib;opengl32.lib;glfw3.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
       <EntryPointSymbol>
       </EntryPointSymbol>
+      <AdditionalOptions>/FORCE:MULTIPLE %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>
       <Command>copy /Y "$(SolutionDir)Dependencies\cplex\bin\x64_win64\cplex2211.dll" "$(TargetDir)"</Command>
@@ -144,6 +145,7 @@
       <AdditionalDependencies>cplex2211.lib;ilocplex.lib;concert.lib;opengl32.lib;glfw3.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
       <EntryPointSymbol>
       </EntryPointSymbol>
+      <AdditionalOptions>/FORCE:MULTIPLE %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>
       <Command>copy /Y "$(SolutionDir)Dependencies\cplex\bin\x64_win64\cplex2211.dll" "$(TargetDir)"</Command>

@@ -1,15 +1,16 @@
 #pragma once
-#include <ilcplex/ilocplex.h>
 #include <vector>
+#include <ilcplex/ilocplex.h>
+#include <Eigen/Core>
 
-class LinearProgram
+using Eigen::MatrixXd;
+
+namespace Linear
 {
-public:
-	bool solve(double t0, double t1, size_t n, size_t dimensions = 1);
+	struct Solution {
+		const std::vector<double> control;
+		const std::vector<double> objective;
+	};
 
-	std::vector<double> getControl() { return control; };
-	std::vector<double> getDynamics() { return dynamics; };
-
-private:
-	std::vector<double> control, dynamics;
-};
+	Solution solve(double t0, double t1, MatrixXd Fc, MatrixXd Fy, MatrixXd Fu);
+}
