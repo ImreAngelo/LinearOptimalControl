@@ -33,7 +33,7 @@ namespace Rendering
         /// </summary>
         /// <param name="title">Name of the window</param>
         /// <param name="showWindow">Experimental</param>
-        Application(const char* title, bool show = true);
+        Application(const char* title);
 
         ~Application();
 

@@ -49,14 +49,12 @@ bool Application::shouldClose()
     return glfwWindowShouldClose(window);
 }
 
-Application::Application(const char* title, bool showWindow)
+Application::Application(const char* title)
 {
     // Initialize GLFW
     glfwInit();
 
     // Create a window
-    glfwWindowHint(GLFW_VISIBLE, showWindow);
-    glfwWindowHint(GLFW_SCALE_TO_MONITOR, GLFW_TRUE);
     window = glfwCreateWindow(1280, 720, title, NULL, NULL);
 
     // Make the window's context current
@@ -68,8 +66,7 @@ Application::Application(const char* title, bool showWindow)
 
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-    //if(!showWindow)
-    //io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+    // io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
     ImGui::StyleColorsDark();
     ImGui_ImplGlfw_InitForOpenGL(window, true);
