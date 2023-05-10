@@ -68,15 +68,10 @@ void Rendering::MainWindow::render()
         constexpr double t1 = 3.0;
         constexpr double dt = t1 / steps;
 
-        const auto Fy = Eigen::VectorXd::Constant(steps, 1, -.7);
-        const auto Fu = Eigen::VectorXd::Constant(steps, 1, -1.0);
+        const Eigen::MatrixXd F0 = Eigen::MatrixXd::Constant(steps, 2, 0);
+        const Eigen::MatrixXd Fu(steps, 2);
 
-        Eigen::VectorXd Fc{ steps };
-        for (auto i = 0; i < steps; i++) {
-            Fc(i, 0) = dt * i * .1;
-        }
-
-        auto solution = Linear::solve(0, t1, Fc, Fy, Fu);
+        auto solution = Linear::solve(0, t1, F0, F0, Fu);
         frame = PlotFrame("Example 2", 0, t1, solution.control, solution.objective);
 
         show = true;

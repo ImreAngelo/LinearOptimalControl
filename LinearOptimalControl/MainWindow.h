@@ -10,7 +10,6 @@ namespace Rendering
 		virtual void render() override;
 
 	private:
-		//LinearProgram lp{};
 		PlotFrame frame{"d"};
 		bool show = false;
 	};
