@@ -68,8 +68,10 @@ void Rendering::MainWindow::render()
         constexpr double t1 = 3.0;
         constexpr double dt = t1 / steps;
 
-        const Eigen::MatrixXd F0 = Eigen::MatrixXd::Constant(steps, 2, 0);
-        const Eigen::MatrixXd Fu(steps, 2);
+        const Eigen::MatrixXd F0 = Eigen::MatrixXd::Constant(2, 2, 0);
+        Eigen::MatrixXd Fu(2, 2);
+        Fu << 1, 1, 
+              0, 1;
 
         auto solution = Linear::solve(0, t1, F0, F0, Fu);
         frame = PlotFrame("Example 2", 0, t1, solution.control, solution.objective);

@@ -14,8 +14,11 @@ Build with x64 config and Debug or Release profile.
 
 
 ## Names
-- ACCEL 	Algorithm/Application for Constrained optimal Control problEms with Linear constraints
-- OPTIMAL 	Optimal control Problems with TIme-dependent and Arbitrary Linear constraints
+- ACCEL 	Algorithm(s)/Application for Constrained optimal Control problEms with Linear constraints
+- OPTIMAL 	Optimal control Problems with TIme-dependent Arbitrary constraints for Linear systems
 
-- SPARTA 	Solution by complete PARameterization of Time-dependent 
+- AGILE 	App for G Linear 
+- SOLVE		
+
+- SPARTA 	Solution by complete PARameterization of Time-dependent optimal control problems with Arbitrary constraints
 - ODYSSEY 	Optimal solution to DYnamic

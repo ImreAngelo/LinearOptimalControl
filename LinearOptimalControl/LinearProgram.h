@@ -89,5 +89,5 @@ public:
 
 private:
 	std::vector<double> control;
-	std::vector<double> control;
+	std::vector<double> objective;
 };
