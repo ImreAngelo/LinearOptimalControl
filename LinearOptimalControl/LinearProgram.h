@@ -33,7 +33,7 @@ public:
 	void getObjective() const {};
 
 	/// <summary>
-	/// n-dimensional
+	/// n-dimensional, time-dependent
 	/// </summary>
 	/// <param name="t0"></param>
 	/// <param name="t1"></param>
@@ -58,8 +58,22 @@ public:
 	/// <param name="Fc"></param>
 	/// <param name="Fy"></param>
 	/// <param name="Fu"></param>
+	LinearProblem(double t0, double t1, MatrixXd Fc, MatrixXd Fy, MatrixXd Fu, size_t steps)
+		//: LinearProblem(t0, t1, MatrixXd::Constant(steps, 1, Fc), MatrixXd::Constant(steps, 1, Fy), MatrixXd::Constant(steps, 1, Fu))
+	{
+		// Create time-dependent matrix from constant matrix
+	};
+
+	/// <summary>
+	/// 1-dimensional problems, not time-dependent
+	/// </summary>
+	/// <param name="t0"></param>
+	/// <param name="t1"></param>
+	/// <param name="Fc"></param>
+	/// <param name="Fy"></param>
+	/// <param name="Fu"></param>
 	LinearProblem(double t0, double t1, double Fc, double Fy, double Fu, size_t steps = DEFAULT_STEPSIZE)
-		: LinearProblem(t0, t1, MatrixXd::Constant(steps, 1, Fc), MatrixXd::Constant(steps, 1, Fy), MatrixXd::Constant(steps, 1, Fu))
+		: LinearProblem(t0, t1, MatrixXd::Constant(1, 1, Fc), MatrixXd::Constant(1, 1, Fy), MatrixXd::Constant(1, 1, Fu), steps)
 	{};
 
 	/// <summary>
