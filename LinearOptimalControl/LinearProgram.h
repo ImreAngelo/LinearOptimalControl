@@ -22,9 +22,10 @@ class LinearProblem
 public:
 	void setDifferentialConstraints() {};
 	void setAlgebraicConstraints() {};
-	void setBoundsU(double min = 0, double max = 1) {};
+	void setBoundsU(double max = 1, double min = 0) {};
+	void setBoundsY(double max = DBL_MAX, double min = 0) {};
 	void setAlgebraicInequalityConstraints() {};
-	void setBoundaryConditions() {};
+	void setBoundaryConditions() {}; // TODO: Unify interface for constraints and boundary conditions
 	void addBoundaryCondition() {};	// Usually only require a single boundary condition (initial value)
 
 	void solve() {}; // return control?
