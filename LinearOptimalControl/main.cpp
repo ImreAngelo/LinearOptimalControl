@@ -6,15 +6,15 @@
 
 int main()
 {
-#ifdef _DEBUG
 #ifdef _WIN32
+#ifdef _DEBUG
     ShowWindow(GetConsoleWindow(), SW_SHOW);
-#endif // _WIN32
-#elif _WIN32
+#else
     ShowWindow(GetConsoleWindow(), SW_HIDE);
 #endif // _DEBUG
+#endif // _WIN32
 
-    // Draw UI on main thread
+    // Draw UI on main thread - TODO: Spin off optimization to separate thread
     Rendering::Application window("Linear Optimal Control Solver");
     while (!window.shouldClose()) {
         window.update();
