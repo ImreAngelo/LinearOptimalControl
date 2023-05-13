@@ -13,97 +13,63 @@ void Rendering::MainWindow::render()
     ImGui::PushStyleColor(ImGuiCol_Button, Color::BACKGROUND);
 
     if (ImGui::Button("Problem 1")) {
-        Eigen::Matrix<std::function<double(double)>, 2, 2> F0 = Eigen::Matrix<std::function<double(double)>, 2, 2>::Constant([](double t) { return 0.0; });
-        Eigen::Matrix<std::function<double(double)>, 2, 2> Fu;
+        auto F0 = Eigen::Matrix<std::function<double(double)>, 1, 1>::Constant([](double t) { return  0.0; });
+        auto Fu = Eigen::Matrix<std::function<double(double)>, 1, 1>::Constant([](double t) { return -1.0; });
 
-        auto Fc = [](double t) { return 0.0; };
-        
-        Fu << [](double t) { return -1.0; }, [](double t) { return 0.0; },
-              [](double t) { return 0.0; }, [](double t) { return -1.0; };
-
-        auto solution = Linear::solve_t(0, 2, Fc, F0, Fu, steps);
+        auto solution = Linear::solve_t(0, 2, F0(0), F0, Fu, steps);
 
         frame = PlotFrame("Example 1", 0, 2, solution.control[0], solution.objective[0]);
         show = true;
 
-//        const auto F0 = Eigen::VectorXd::Constant(steps, 1, 0.0);
-//        const auto Fu = Eigen::VectorXd::Constant(steps, 1, -1.0);
-//        const auto solution = Linear::solve(0, 2, F0, F0, Fu);
-//
-//        frame = PlotFrame("Example 1", 0, 2, solution.control, solution.objective);
-//        show = true;
-//
-//#ifdef _DEBUG
-//        // print csv for paper 
-//        std::cout << "\nControl:\n" << "x, y" << std::endl;
-//        for (auto i = 0; i < solution.control.size(); i++)
-//            std::cout << (2.0/steps) * i << ", " << std::round(solution.control[i] * 10000) / 10000 << std::endl;
-//
-//        std::cout << "\nObjective:\n" << "x, y" << std::endl;
-//        for (auto i = 0; i < solution.objective.size(); i++)
-//            std::cout << (2.0/steps) * i << ", " << std::round(solution.objective[i] * 10000) / 10000 << std::endl;
-//#endif // _DEBUG
+#ifdef _DEBUG
+        // print csv for paper 
+        std::cout << "\nControl:\n" << "x, y" << std::endl;
+        for (auto i = 0; i < solution.control[0].size(); i++)
+            std::cout << (2.0/steps) * i << ", " << std::round(solution.control[0][i] * 10000) / 10000 << std::endl;
+
+        std::cout << "\nObjective:\n" << "x, y" << std::endl;
+        for (auto i = 0; i < solution.objective[0].size(); i++)
+            std::cout << (2.0/steps) * i << ", " << std::round(solution.objective[0][i] * 10000) / 10000 << std::endl;
+#endif // _DEBUG
     }
 
     ImGui::SameLine();
 
     if (ImGui::Button("Problem 2")) {
-        Eigen::Matrix<std::function<double(double)>, 2, 2> Fy;
-        Eigen::Matrix<std::function<double(double)>, 2, 2> Fu;
+        auto Fy = Eigen::Matrix<std::function<double(double)>, 1, 1>::Constant([](double t) { return -.7; });
+        auto Fu = Eigen::Matrix<std::function<double(double)>, 1, 1>::Constant([](double t) { return -1.; });
+        auto Fc = [](double t) { return .1*t; };
 
-        auto Fc = [](double t) { return 1.0; };
+        auto solution = Linear::solve_t(0, 3, Fc, Fy, Fu, steps);
 
-        Fy << [](double t) { return 0.7; }, [](double t) { return 0.0; },
-              [](double t) { return 0.0; }, [](double t) { return -0.7; };
-
-        Fu << [](double t) { return -1.0; }, [](double t) { return 0.0; },
-              [](double t) { return 0.0; }, [](double t) { return -1.0; };
-
-        auto solution = Linear::solve_t(0, 2, Fc, Fy, Fu, steps);
-
-        frame = PlotFrame("Example 2", 0, 2, solution.control[1], solution.objective[1]);
+        frame = PlotFrame("Example 2", 0, 3, solution.control[0], solution.objective[0]);
         show = true;
 
-//        constexpr double t1 = 3.0;
-//        constexpr double dt = t1/steps;
-//
-//        const auto Fy = Eigen::VectorXd::Constant(steps, 1, .7);
-//        const auto Fu = Eigen::VectorXd::Constant(steps, 1, -1.0);
-//        
-//        Eigen::VectorXd Fc{steps};
-//        for (auto i = 0; i < steps; i++) {
-//            Fc(i,0) = dt * i * .1;
-//        }
-//
-//        auto solution = Linear::solve(0, t1, Fc, Fy, Fu);
-//        frame = PlotFrame("Example 2", 0, t1, solution.control, solution.objective);
-//
-//        show = true;
-//
-//#ifdef _DEBUG
-//        // print csv for paper 
-//        std::cout << "\nControl:\n" << "x, y" << std::endl;
-//        for (auto i = 0; i < solution.control.size(); i++)
-//            std::cout << dt * i << ", " << std::round(solution.control[i] * 10000)/10000 << std::endl;
-//
-//        std::cout << "\nObjective:\n" << "x, y" << std::endl;
-//        for (auto i = 0; i < solution.objective.size(); i++)
-//            std::cout << dt * i << ", " << std::round(solution.objective[i] * 10000)/10000 << std::endl;
-//#endif // _DEBUG
+#ifdef _DEBUG
+        // print csv for paper 
+        std::cout << "\nControl:\n" << "x, y" << std::endl;
+        for (auto i = 0; i < solution.control[0].size(); i++)
+            std::cout << (3.0/steps) *i << ", " << std::round(solution.control[0][i] * 10000) / 10000 << std::endl;
+
+        std::cout << "\nObjective:\n" << "x, y" << std::endl;
+        for (auto i = 0; i < solution.objective[0].size(); i++)
+            std::cout << (3.0/steps) * i << ", " << std::round(solution.objective[0][i] * 10000)/10000 << std::endl;
+#endif // _DEBUG
     }
 
     ImGui::SameLine();
     if (ImGui::Button("Problem 3")) {
-        /*auto F0 = Eigen::Matrix<std::function<double(double)>, 2, 2>::Constant(2,2, [](double t) { return -1.0; });
+        auto Fc = [](double t) { return 0.0; };
+        Eigen::Matrix<std::function<double(double)>, 2, 2> Fy(Fc, Fc, Fc, Fc);
         Eigen::Matrix<std::function<double(double)>, 2, 2> Fu;
 
         Fu << [](double t) { return -1.0; }, [](double t) { return 0.0; },
-              [](double t) { return 0.0; }, [](double t) { return 1.0; };
+              [](double t) { return 0.0; }, [](double t) { return -1.0; };
 
-        auto solution = Linear::solve_t(0, 2, Fc, Fy, Fu, steps);
+        auto solution = Linear::solve_t(0, 3, Fc, Fy, Fu, steps);
 
-        frame = PlotFrame("Example 3", 0, 2, solution.control[1], solution.objective[1]);
-        show = true;*/
+        frame = PlotFrame("Example 2", 0, 3, solution.control[1], solution.objective[1]);
+        show = true;
 
 //        constexpr double t1 = 3.0;
 //        constexpr double dt = t1 / steps;

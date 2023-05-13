@@ -183,13 +183,13 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, Func Fc, Matr
     for (auto j = 0; j < m - 1; j++) {
         auto t = j * dt + t0;
 
-        //auto _t = MatrixUtil::mul(MatrixUtil::eval(Fu, t), u.col(j));
+        auto _c = Fc(t);
         auto _y = MatrixUtil::mul(MatrixUtil::eval(Fy, t), y.col(j));
         auto _u = MatrixUtil::mul(MatrixUtil::eval(Fu, t), u.col(j));
 
         for (auto i = 0; i < n; i++)
         {
-            model.add(y(i, j + 1) == y(i, j) + dt * (_y(i, 0) + _u(i, 0)));
+            model.add(y(i, j + 1) == y(i, j) + dt * (_c + _y(i, 0) + _u(i, 0)));
         }
     }
 
@@ -199,8 +199,8 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, Func Fc, Matr
 
     // Add boundary conditions
     // TODO: Function
-    model.add(y(0, 0) == 1);
-    model.add(y(1, 0) == 1);
+    for(auto i = 0; i < dim; i++)
+        model.add(y(i, 0) == 1);
 
     try {
         // Solve
