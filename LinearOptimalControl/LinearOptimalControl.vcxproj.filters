@@ -78,6 +78,9 @@
     <ClCompile Include="MainWindow.cpp">
       <Filter>Source Files\rendering</Filter>
     </ClCompile>
+    <ClCompile Include="RungeKutta.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Dependencies\imgui\imgui.h">
@@ -129,6 +132,12 @@
       <Filter>Header Files\rendering</Filter>
     </ClInclude>
     <ClInclude Include="Matrix.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RungeKutta.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Timer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -229,5 +238,6 @@
     <None Include="..\Dependencies\eigen\Eigen\UmfPackSupport">
       <Filter>Header Files\eigen</Filter>
     </None>
+    <None Include="imgui.ini" />
   </ItemGroup>
 </Project>

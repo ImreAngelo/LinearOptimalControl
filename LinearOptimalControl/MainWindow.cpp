@@ -21,7 +21,7 @@ void Rendering::MainWindow::render()
         frame = PlotFrame("Example 1", 0, 2, solution.control[0], solution.objective[0]);
         show = true;
 
-#ifdef _DEBUG
+#ifndef _DEBUG
         // print csv for paper 
         std::cout << "\nControl:\n" << "x, y" << std::endl;
         for (auto i = 0; i < solution.control[0].size(); i++)

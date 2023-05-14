@@ -166,6 +166,7 @@
     <ClCompile Include="MainWindow.cpp" />
     <ClCompile Include="PlotFrame.cpp" />
     <ClCompile Include="Application.cpp" />
+    <ClCompile Include="RungeKutta.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Dependencies\imgui\backends\imgui_impl_glfw.h" />
@@ -184,6 +185,8 @@
     <ClInclude Include="Matrix.h" />
     <ClInclude Include="PlotFrame.h" />
     <ClInclude Include="Application.h" />
+    <ClInclude Include="RungeKutta.h" />
+    <ClInclude Include="Timer.h" />
     <ClInclude Include="Window.h" />
   </ItemGroup>
   <ItemGroup>

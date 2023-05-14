@@ -1,5 +1,6 @@
 #include "LinearProgram.h"
 #include "Matrix.h"
+#include "Timer.h"
 
 template<typename T>
 using Matrix = MatrixUtil::Matrix<T>;
@@ -159,6 +160,8 @@ using Matrix = MatrixUtil::Matrix<T>;
 
 Linear::Solution Linear::solve_t(const double t0, const double t1, Func Fc, MatrixT Fy, MatrixT Fu, const size_t steps)
 {
+    TIME_FUNCTION();
+
     const double dt = (t1 - t0) / steps;
     const size_t dim = Fu.cols();
 
@@ -181,6 +184,8 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, Func Fc, Matr
     }
 
     // Discretize
+    TIMER_START("Runge-Kutta");
+
     const size_t n = y.rows();
     const size_t m = y.cols();
 
@@ -197,6 +202,8 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, Func Fc, Matr
         }
     }
 
+    TIMER_STOP();
+
     // Build objective function
     IloNumExprArg obj = MatrixUtil::mulSum(Matrix<IloNum>::Constant(steps, dim, 1.0), y);
     model.add(IloMinimize(env, obj));
@@ -208,10 +215,14 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, Func Fc, Matr
 
     try {
         // Solve
+        TIMER_START("CPLEX");
         IloCplex cplex(model);
         cplex.solve();
+        TIMER_STOP();
 
         // Output
+        TIMER_START("Output");
+
         auto control = MultiVector(dim);
         auto objective = MultiVector(dim);
 
@@ -228,6 +239,8 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, Func Fc, Matr
                 obj.emplace_back(cplex.getValue(y(i, j)));
             }
         }
+
+        TIMER_STOP();
 
         return { control, objective };
     }
