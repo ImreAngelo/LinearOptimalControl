@@ -169,9 +169,13 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, Func Fc, Matr
     Matrix<IloNumVar> u(dim, steps);
     Matrix<IloNumVar> y(dim, steps);
 
+    // Cheat
+    constexpr double max[2] = { DBL_MAX, 0.0 };
+    constexpr double min[2] = { 0.0, DBL_MIN };
+
     for (auto j = 0; j < steps; j++) {   // Col
         for (auto i = 0; i < dim; i++) { // Row
-            u(i, j) = IloNumVar(env, -1.0, 1.0);
+            u(i, j) = dim == 2 ? IloNumVar(env, min[i], max[i]) : IloNumVar(env, 0, 1);
             y(i, j) = IloNumVar(env, 0, DBL_MAX);
         }
     }

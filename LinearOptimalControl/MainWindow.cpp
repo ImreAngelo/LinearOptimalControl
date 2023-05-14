@@ -60,37 +60,27 @@ void Rendering::MainWindow::render()
     ImGui::SameLine();
     if (ImGui::Button("Problem 3")) {
         auto Fc = [](double t) { return 0.0; };
-        Eigen::Matrix<std::function<double(double)>, 2, 2> Fy(Fc, Fc, Fc, Fc);
+        Eigen::Matrix<std::function<double(double)>, 2, 2> Fy;
         Eigen::Matrix<std::function<double(double)>, 2, 2> Fu;
 
+        Fy << [](double t) { return 0.0; }, [](double t) { return 0.0; }, 
+              [](double t) { return 0.0; }, [](double t) { return 0.0; };
+
         Fu << [](double t) { return -1.0; }, [](double t) { return 0.0; },
-              [](double t) { return 0.0; }, [](double t) { return -1.0; };
+              [](double t) { return 0.0; },  [](double t) { return 1.0; };
 
         auto solution = Linear::solve_t(0, 3, Fc, Fy, Fu, steps);
 
-        frame = PlotFrame("Example 2", 0, 3, solution.control[1], solution.objective[1]);
+        frame = PlotFrame("Example 3", 0, 3, solution.control[0], solution.objective[0]);
         show = true;
 
-//        constexpr double t1 = 3.0;
-//        constexpr double dt = t1 / steps;
-//
-//        const Eigen::MatrixXd F0 = Eigen::MatrixXd::Constant(2, 2, 0);
-//        Eigen::MatrixXd Fu(2, 2);
-//        Fu << 1, 1, 
-//              0, 1;
-//
-//        auto solution = Linear::solve(0, t1, F0, F0, Fu);
-//        frame = PlotFrame("Example 2", 0, t1, solution.control, solution.objective);
-//
-//        show = true;
-//
 //#ifdef _DEBUG
 //        // print csv for paper 
-//        std::cout << "\nControl:\n" << "x, y" << std::endl;
+//        std::cout << "\nControl 1:\n" << "x, y" << std::endl;
 //        for (auto i = 0; i < solution.control.size(); i++)
 //            std::cout << (2.0 / steps) * i << ", " << std::round(solution.control[i] * 10000) / 10000 << std::endl;
 //
-//        std::cout << "\nObjective:\n" << "x, y" << std::endl;
+//        std::cout << "\nObjective 1:\n" << "x, y" << std::endl;
 //        for (auto i = 0; i < solution.objective.size(); i++)
 //            std::cout << (2.0 / steps) * i << ", " << std::round(solution.objective[i] * 10000) / 10000 << std::endl;
 //#endif // _DEBUG
