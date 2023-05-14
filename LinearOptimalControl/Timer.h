@@ -23,7 +23,7 @@ struct AutoTimer
 	~AutoTimer()
 	{
 		auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start);
-		std::cout << "\n[Timer] " << name << "` took " << duration.count() << " ms\n";
+		std::cout << "\n[Timer] " << name << " took " << duration.count() << " ms\n";
 	}
 };
 
@@ -31,16 +31,18 @@ namespace Timer
 {
 	AutoTimer* active = nullptr;
 
-	void start(const char* name)
-	{
-		assert(active == nullptr);
-		active = new AutoTimer(name);
-	};
-
 	void stop()
 	{
 		delete active;
 		active = nullptr;
+	};
+
+	void start(const char* name)
+	{
+		if (active)
+			stop();
+
+		active = new AutoTimer(name);
 	};
 };
 
