@@ -3,7 +3,7 @@
 #include "Color.h"
 #include <imgui.h>
 
-constexpr int steps = 200;
+constexpr int steps = 500;
 
 void Rendering::MainWindow::render()
 {
@@ -21,22 +21,22 @@ void Rendering::MainWindow::render()
         frame = PlotFrame("Example 1", 0, 2, solution.control[0], solution.objective[0]);
         show = true;
 
-#ifndef _DEBUG
-        // print csv for paper 
-        std::cout << "\nControl:\n" << "x, y" << std::endl;
-        for (auto i = 0; i < solution.control[0].size(); i++)
-            std::cout << (2.0/steps) * i << ", " << std::round(solution.control[0][i] * 10000) / 10000 << std::endl;
-
-        std::cout << "\nObjective:\n" << "x, y" << std::endl;
-        for (auto i = 0; i < solution.objective[0].size(); i++)
-            std::cout << (2.0/steps) * i << ", " << std::round(solution.objective[0][i] * 10000) / 10000 << std::endl;
-#endif // _DEBUG
+//#ifdef _DEBUG
+//        // print csv for paper 
+//        std::cout << "\nControl:\n" << "x, y" << std::endl;
+//        for (auto i = 0; i < solution.control[0].size(); i++)
+//            std::cout << (2.0/steps) * i << ", " << std::round(solution.control[0][i] * 10000) / 10000 << std::endl;
+//
+//        std::cout << "\nObjective:\n" << "x, y" << std::endl;
+//        for (auto i = 0; i < solution.objective[0].size(); i++)
+//            std::cout << (2.0/steps) * i << ", " << std::round(solution.objective[0][i] * 10000) / 10000 << std::endl;
+//#endif // _DEBUG
     }
 
     ImGui::SameLine();
 
     if (ImGui::Button("Problem 2")) {
-        auto Fy = Eigen::Matrix<std::function<double(double)>, 1, 1>::Constant([](double t) { return -.7; });
+        auto Fy = Eigen::Matrix<std::function<double(double)>, 1, 1>::Constant([](double t) { return .7; });
         auto Fu = Eigen::Matrix<std::function<double(double)>, 1, 1>::Constant([](double t) { return -1.; });
         auto Fc = [](double t) { return .1*t; };
 
@@ -45,16 +45,16 @@ void Rendering::MainWindow::render()
         frame = PlotFrame("Example 2", 0, 3, solution.control[0], solution.objective[0]);
         show = true;
 
-#ifdef _DEBUG
-        // print csv for paper 
-        std::cout << "\nControl:\n" << "x, y" << std::endl;
-        for (auto i = 0; i < solution.control[0].size(); i++)
-            std::cout << (3.0/steps) *i << ", " << std::round(solution.control[0][i] * 10000) / 10000 << std::endl;
-
-        std::cout << "\nObjective:\n" << "x, y" << std::endl;
-        for (auto i = 0; i < solution.objective[0].size(); i++)
-            std::cout << (3.0/steps) * i << ", " << std::round(solution.objective[0][i] * 10000)/10000 << std::endl;
-#endif // _DEBUG
+//#ifdef _DEBUG
+//        // print csv for paper 
+//        std::cout << "\nControl:\n" << "x, y" << std::endl;
+//        for (auto i = 0; i < solution.control[0].size(); i++)
+//            std::cout << (3.0/steps) *i << ", " << std::round(solution.control[0][i] * 10000) / 10000 << std::endl;
+//
+//        std::cout << "\nObjective:\n" << "x, y" << std::endl;
+//        for (auto i = 0; i < solution.objective[0].size(); i++)
+//            std::cout << (3.0/steps) * i << ", " << std::round(solution.objective[0][i] * 10000)/10000 << std::endl;
+//#endif // _DEBUG
     }
 
     ImGui::SameLine();

@@ -2,17 +2,24 @@
 
 #ifdef _WIN32
 #include <Windows.h>
+
+void initSystem(bool release = false)
+{
+#ifdef _DEBUG
+    ShowWindow(GetConsoleWindow(), SW_SHOW);
+#else
+    //ShowWindow(GetConsoleWindow(), SW_HIDE);
+#endif // _DEBUG
+}
+
+#elif
+void initSystem(bool release = false);
 #endif // _WIN32
 
 int main()
 {
-#ifdef _WIN32
-#ifdef _DEBUG
-    ShowWindow(GetConsoleWindow(), SW_SHOW);
-#else
-    ShowWindow(GetConsoleWindow(), SW_HIDE);
-#endif // _DEBUG
-#endif // _WIN32
+    // Hide console on windows
+    initSystem();
 
     // Draw UI on main thread - TODO: Spin off optimization to separate thread
     Rendering::Application window("Linear Optimal Control Solver");

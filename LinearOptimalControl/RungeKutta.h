@@ -1,27 +1,42 @@
-//#pragma once
-//#include "Matrix.h"
-//
-//namespace RungeKutta
-//{
-//    using namespace MatrixUtil;
-//
-//	void parameterize(IloModel& model, const Matrix<IloNumVar>& y, const Matrix<IloNumVar>& u, const std::function<double(double)>& Fc, const Matrix<double>& Fy, const Matrix<double>& Fu, double dt, double t0 = 0)
-//	{
-//        const size_t n = y.rows();  // dimensions
-//        const size_t m = y.cols();  // steps
-//
-//        for (auto j = 0; j < m - 1; j++) {
-//            auto t = j * dt + t0;
-//
-//            auto _c = Fc(t);
-//            auto _y = MatrixUtil::mul(MatrixUtil::eval(Fy, t), y.col(j));
-//            auto _u = MatrixUtil::mul(MatrixUtil::eval(Fu, t), u.col(j));
-//
-//            for (auto i = 0; i < n; i++)
-//            {
-//                model.add(y(i, j + 1) == y(i, j) + dt * (_c + _y(i, 0) + _u(i, 0)));
-//            }
-//        }
-//	};
-//};
-//
+#pragma once
+#include <vector>
+#include "Matrix.h"
+
+// TODO: Fix vector include
+
+namespace RungeKutta
+{
+    // TODO: Simplify ButcherTable interface (just use a matrix)
+
+    struct ButcherTable
+    {
+        const size_t order;
+
+        const std::vector<std::vector<double>> a;
+        const std::vector<double> b;
+        const std::vector<double> c;
+
+        ButcherTable(std::vector<double> c, std::vector<std::vector<double>> a, std::vector<double> b)
+            : order(c.size()), a(a), b(b), c(c)
+        {
+            assert(c.size() == b.size());
+        }
+    };
+
+    static const ButcherTable euler{ {0},{{0}},{1} };
+    static const ButcherTable heun{ {0,1},{{0,0},{1,0}},{1.0 / 2.0, 1.0 / 2.0} };
+    static const ButcherTable rk4{ {0,0.5,0.5,1}, {{ 0, 0, 0, 0},{.5, 0, 0, 0},{ 0,.5, 0, 0},{ 0, 0, 1, 0},},{(1.0 / 6.0), (1.0 / 3.0), (1.0 / 3.0), (1.0 / 6.0)} };
+
+
+    // =====
+
+
+	typedef std::function<double(double)> func;
+	typedef Eigen::Matrix<func, Eigen::Dynamic, Eigen::Dynamic> Matrix;
+	typedef Eigen::Matrix<IloNumVar, Eigen::Dynamic, Eigen::Dynamic> IloMatrix;
+
+	/// <summary>
+	/// Use Runge-Kutta with complete parameterization
+	/// </summary>
+	void parameterize(IloModel& model, const IloMatrix& y, const IloMatrix& u, const func& Fc, const Matrix& Fy, const Matrix& Fu, double dt, double t0 = 0, ButcherTable table = euler);
+};

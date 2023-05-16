@@ -12,7 +12,8 @@ namespace MatrixUtil
     using Matrix = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>;
 
     // Matrices A * B
-    Matrix<IloNumExprArg> mul(Matrix<IloNum> lhs, Matrix<IloNumVar> rhs)
+    template <typename T>
+    static inline Matrix<IloNumExprArg> mul(Matrix<IloNum> lhs, Matrix<T> rhs)
     {
         assert(lhs.cols() == rhs.rows());
         Matrix<IloNumExprArg> expr(lhs.rows(), rhs.cols());
@@ -31,8 +32,56 @@ namespace MatrixUtil
         return expr;
     }
 
+    // Add scalar to matrix
+    template <typename T>
+    static inline Matrix<IloNumExprArg> add(const Matrix<IloNumVar>& lhs, const Matrix<T>& rhs)
+    {
+        Matrix<IloNumExprArg> r(lhs.rows(), lhs.cols());
+
+        for (auto i = 0; i < lhs.rows(); i++) {
+            for (auto j = 0; j < lhs.cols(); j++) {
+                r(i, j) = lhs(i, j) + rhs(i, j);
+            }
+        }
+
+        return r;
+    };
+
+    // Multiply scalar into matrix
+    template <typename T>
+    static inline Matrix<IloNumExprArg> scalarMul(const Matrix<T>& lhs, double rhs)
+    {
+        Matrix<IloNumExprArg> r(lhs.rows(), lhs.cols());
+
+        for (auto i = 0; i < lhs.rows(); i++) {
+            for (auto j = 0; j < lhs.cols(); j++) {
+                auto v = lhs(i, j);
+                //std::cout << i << ", " << j << ": " << v << " * " << rhs << std::endl;
+                r(i, j) = v * rhs;
+            }
+        }
+
+        return r;
+    };
+
+    // Multiply scalar into matrix
+    template <typename T>
+    static inline Matrix<IloNumExprArg> scalarAdd(const Matrix<T>& lhs, double rhs)
+    {
+        Matrix<IloNumExprArg> r(lhs.rows(), lhs.cols());
+
+        for (auto i = 0; i < lhs.rows(); i++) {
+            for (auto j = 0; j < lhs.cols(); j++) {
+                auto v = lhs(i, j);
+                r(i, j) = v + rhs;
+            }
+        }
+
+        return r;
+    };
+
     // Vectors A * B
-    IloNumExprArg dot(Eigen::Matrix<IloNum, 1, Eigen::Dynamic> lhs, Eigen::Matrix<IloNumVar, Eigen::Dynamic, 1> rhs)
+    static inline IloNumExprArg dot(Eigen::Matrix<IloNum, 1, Eigen::Dynamic> lhs, Eigen::Matrix<IloNumVar, Eigen::Dynamic, 1> rhs)
     {
         assert(lhs.cols() == rhs.rows());
 
@@ -44,7 +93,7 @@ namespace MatrixUtil
     }
 
     // Sum elements of (A * B)
-    IloNumExprArg mulSum(Matrix<IloNum> lhs, Matrix<IloNumVar> rhs)
+    static inline IloNumExprArg mulSum(Matrix<IloNum> lhs, Matrix<IloNumVar> rhs)
     {
         IloNumExprArg obj = rhs(0, 0) - rhs(0, 0);
 
@@ -61,7 +110,7 @@ namespace MatrixUtil
     }
 
     // Eval a matrix of functions
-    Matrix<IloNum> eval(Matrix<std::function<double(double)>> m, double t)
+    static inline Matrix<IloNum> eval(Matrix<std::function<double(double)>> m, double t)
     {
         Matrix<IloNum> o(m.rows(), m.cols());
 
@@ -74,3 +123,46 @@ namespace MatrixUtil
         return o;
     }
 }
+
+
+//typedef Eigen::Matrix<IloNumExprArg, Eigen::Dynamic, Eigen::Dynamic> ArgMatrix;
+
+//// Add scalar to matrix
+//ArgMatrix& operator+(const ArgMatrix& lhs, IloNumExprArg rhs)
+//{
+//    ArgMatrix r;
+//
+//    for (auto i = 0; i < lhs.rows(); i++) {
+//        for (auto j = 0; j < lhs.cols(); j++) {
+//            r(i, j) = lhs(i, j) + rhs;
+//        }
+//    }
+//
+//    return r;
+//};
+//
+//ArgMatrix& operator+(const ArgMatrix& lhs, double rhs)
+//{
+//    ArgMatrix r;
+//
+//    for (auto i = 0; i < lhs.rows(); i++) {
+//        for (auto j = 0; j < lhs.cols(); j++) {
+//            r(i, j) = lhs(i, j) * rhs;
+//        }
+//    }
+//
+//    return r;
+//};
+//
+//ArgMatrix& operator*(const ArgMatrix& lhs, double rhs)
+//{
+//    ArgMatrix r(lhs.rows(), lhs.cols());
+//
+//    for (auto i = 0; i < lhs.rows(); i++) {
+//        for (auto j = 0; j < lhs.cols(); j++) {
+//            r(i, j) = lhs(i, j) * rhs;
+//        }
+//    }
+//
+//    return r;
+//};

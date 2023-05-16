@@ -1,6 +1,7 @@
 #include "LinearProgram.h"
 #include "Matrix.h"
 #include "Timer.h"
+#include "RungeKutta.h"
 
 template<typename T>
 using Matrix = MatrixUtil::Matrix<T>;
@@ -160,7 +161,7 @@ using Matrix = MatrixUtil::Matrix<T>;
 
 Linear::Solution Linear::solve_t(const double t0, const double t1, Func Fc, MatrixT Fy, MatrixT Fu, const size_t steps)
 {
-    TIME_FUNCTION();
+    TIME_SCOPE();
 
     const double dt = (t1 - t0) / steps;
     const size_t dim = Fu.cols();
@@ -183,29 +184,28 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, Func Fc, Matr
         }
     }
 
-    // Discretize
-    TIMER_START("Runge-Kutta");
+    // Complete Parameterization
+    RungeKutta::parameterize(model, y, u, Fc, Fy, Fu, dt, t0);
 
-    const size_t n = y.rows();
-    const size_t m = y.cols();
+    /*
+    auto eigen_y = Matrix<float>::Constant(2*dim, steps, 2.4f);
+    auto eigen_m = Matrix<float>::Constant(steps, 2*dim, 1.0f);
 
-    for (auto j = 0; j < m - 1; j++) {
-        auto t = j * dt + t0;
+    TIMER_START("Eigen test");
+    auto result = (eigen_m * eigen_y).sum();
 
-        auto _c = Fc(t);
-        auto _y = MatrixUtil::mul(MatrixUtil::eval(Fy, t), y.col(j));
-        auto _u = MatrixUtil::mul(MatrixUtil::eval(Fu, t), u.col(j));
+    TIMER_STOP();
 
-        for (auto i = 0; i < n; i++)
-        {
-            model.add(y(i, j + 1) == y(i, j) + dt * (_c + _y(i, 0) + _u(i, 0)));
-        }
-    }
+    std::cout << result;
+    */
 
     TIMER_START("Build objective");
 
     // Build objective function
     IloNumExprArg obj = MatrixUtil::mulSum(Matrix<IloNum>::Constant(steps, dim, 1.0), y);
+
+    TIMER_START("Set objective and boundary");
+
     model.add(IloMinimize(env, obj));
 
     // Add boundary conditions
