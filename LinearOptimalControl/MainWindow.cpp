@@ -41,9 +41,9 @@ void Rendering::MainWindow::render()
         auto Fu = Eigen::Matrix<std::function<double(double)>, 1, 1>::Constant([](double t) { return -1.; });
         auto Fc = [](double t) { return .1*t; };
 
-        auto solution = Linear::solve_t(0, 3, Fc, Fy, Fu, steps);
+        auto [control, objective] = Linear::solve_t(0, 3, Fc, Fy, Fu, steps);
 
-        frame = PlotFrame("Example 2", 0, 3, solution.control[0], solution.objective[0]);
+        frame = PlotFrame("Example 2", 0, 3, control[0], objective[0]);
         show = true;
 
 //#ifdef _DEBUG
@@ -95,7 +95,7 @@ void Rendering::MainWindow::render()
         Fy << [](double t) { return a; }, [](double t) { return -b; },
               [](double t) { return c; }, [](double t) { return -d; };
 
-        auto [ r, t ] = RungeKutta::solve(y0, F0, Fy, F0, steps, 5.0, 0.0);
+        auto [ r, t ] = RungeKutta::solve(y0, F0, Fy, F0, steps, 5.0, 0.0, RungeKutta::euler);
 
         x = std::vector<double>(steps, 0.0);
         y = std::vector<double>(steps, 0.0);

@@ -185,7 +185,7 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, Func Fc, Matr
     }
 
     // Complete Parameterization
-    RungeKutta::parameterize(model, y, u, Fc, Fy, Fu, dt, t0);
+    RungeKutta::parameterize(model, y, u, Fc, Fy, Fu, dt, t0, RungeKutta::heun);
 
     /*
     auto eigen_y = Matrix<float>::Constant(2*dim, steps, 2.4f);

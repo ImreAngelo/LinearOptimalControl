@@ -1,9 +1,21 @@
 #include "RungeKutta.h"
 #include "Timer.h"
 
+MatrixUtil::Matrix<IloNumExprArg> makeZero(IloNumVar temp, size_t dims)
+{
+    MatrixUtil::Matrix<IloNumExprArg> sum(dims, dims);
+    for (auto ii = 0; ii < dims; ii++)
+        for (auto jj = 0; jj < dims; jj++)
+        {
+            IloNumExprArg obj = temp - temp;
+            sum(ii, jj) = obj;
+        }
+    return sum;
+}
+
 void RungeKutta::parameterize(IloModel& model, const IloMatrix& y, const IloMatrix& u, const func& Fc, const Matrix& Fy, const Matrix& Fu, double dt, double t0, ButcherTable table)
 {
-    TIME_SCOPE("Runge Kutta");
+    TIME_SCOPE("Runge Kutta (parameterization)");
 
     using MatrixUtil::mul;
     using MatrixUtil::eval;
@@ -24,35 +36,46 @@ void RungeKutta::parameterize(IloModel& model, const IloMatrix& y, const IloMatr
 
         for (auto i = 0; i < table.order; i++)
         {
+            const double ct = t + table.c[i] * dt;
+            Eigen::MatrixXd fy = eval(Fy, ct);
+
             // TODO: simply a.row(i) * k
             // sum of a_{i,j} * k_j
-            MatrixUtil::Matrix<IloNumExprArg> sum = MatrixUtil::Matrix<IloNumExprArg>::Constant(dims, dims, u(0,0) - u(0,0));
+            MatrixUtil::Matrix<IloNumExprArg> sum = makeZero(y(0,0), dims);
           
             // explicit
             for (auto j = 0; j < i; j++)
             {
-                sum = scalarMul(k[j], table.a[i][j]) + sum;
+                auto intermediate = k[j];
+                for (auto ii = 0; ii < dims; ii++)
+                    for (auto jj = 0; jj < dims; jj++)
+                        intermediate(ii, jj) = k[j](ii, jj) * fy(ii, jj) * table.a[i][j];
+
+                sum = intermediate + sum;
             }
 
-            auto ct = t + table.c[i] * dt;
-            MatrixUtil::Matrix<IloNumExprArg> fyy = mul(eval(Fy, ct), y).col(n);
-            MatrixUtil::Matrix<IloNumExprArg> fyc = mul(eval(Fy, ct), sum);
+            MatrixUtil::Matrix<IloNumExprArg> fyy = mul(fy, y).col(n);
+            //MatrixUtil::Matrix<IloNumExprArg> fyc = mul(fy, sum); // TODO: This line causes problems!
             MatrixUtil::Matrix<IloNumExprArg> fu = mul(eval(Fu, ct), u).col(n);
 
-            MatrixUtil::Matrix<IloNumExprArg> f = (fyy + fyc + fu);
-
-            //std::cout << "f: (" << f.rows() << ", " << f.cols() << ")" << std::endl;
+            MatrixUtil::Matrix<IloNumExprArg> f = (sum + fyy /*+ fyc*/ + fu);
 
             // dt * f(t_{n+c_i}, y_n + sum)
-            k.emplace_back(scalarAdd(scalarMul(f, dt), Fc(ct) * dt));
+            auto ki = scalarAdd(scalarMul(f, dt), Fc(ct) * dt);
+            k.emplace_back(ki);
         }
 
         // ===== 
 
-        MatrixUtil::Matrix<IloNumExprArg> ks = MatrixUtil::Matrix<IloNumExprArg>::Constant(dims, dims, u(0, 0) - u(0, 0));
+        MatrixUtil::Matrix<IloNumExprArg> ks = makeZero(y(0,0), dims); // scalarMul(k[0], table.b[0]);
 
         for (auto i = 0; i < table.order; i++)
-            ks = scalarMul(k[i], table.b[i]) + ks;
+        {
+            auto temp1 = k[i];
+            auto temp2 = ks; // scalarMul(k[i], table.b[i]) + ks;
+            MatrixUtil::Matrix<IloNumExprArg> temp3 = temp1 + temp2;
+            ks = temp3;
+        }
 
         for (auto d = 0; d < dims; d++)
             model.add(y(d, n + 1) == y(d, n) + ks.row(d).sum());
@@ -109,6 +132,8 @@ RungeKutta::ret RungeKutta::solve(const Eigen::MatrixXd& y0, const Matrix& Fc, c
 
             k.emplace_back(dt * (fc + fy * (y[n] + sum)));
         }
+
+        //Eigen::MatrixX2d b();
 
         Eigen::MatrixXd kSum = k[0] * table.b[0];
 

@@ -34,7 +34,7 @@ namespace MatrixUtil
 
     // Add scalar to matrix
     template <typename T>
-    static inline Matrix<IloNumExprArg> add(const Matrix<IloNumVar>& lhs, const Matrix<T>& rhs)
+    static inline Matrix<IloNumExprArg> add(const Matrix<IloNumVar> lhs, const Matrix<T>& rhs)
     {
         Matrix<IloNumExprArg> r(lhs.rows(), lhs.cols());
 
@@ -49,7 +49,7 @@ namespace MatrixUtil
 
     // Multiply scalar into matrix
     template <typename T>
-    static inline Matrix<IloNumExprArg> scalarMul(const Matrix<T>& lhs, double rhs)
+    static inline Matrix<IloNumExprArg> scalarMul(const Matrix<T> lhs, double rhs)
     {
         Matrix<IloNumExprArg> r(lhs.rows(), lhs.cols());
 
@@ -66,7 +66,7 @@ namespace MatrixUtil
 
     // Multiply scalar into matrix
     template <typename T>
-    static inline Matrix<IloNumExprArg> scalarAdd(const Matrix<T>& lhs, double rhs)
+    static inline Matrix<IloNumExprArg> scalarAdd(const Matrix<T> lhs, double rhs)
     {
         Matrix<IloNumExprArg> r(lhs.rows(), lhs.cols());
 
@@ -93,7 +93,7 @@ namespace MatrixUtil
     }
 
     // Sum elements of (A * B)
-    static inline IloNumExprArg mulSum(Matrix<IloNum> lhs, Matrix<IloNumVar> rhs)
+    static inline IloNumExprArg mulSum(const Matrix<IloNum> lhs, const Matrix<IloNumVar> rhs)
     {
         IloNumExprArg obj = rhs(0, 0) - rhs(0, 0);
 

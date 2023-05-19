@@ -23,11 +23,8 @@ namespace RungeKutta
         }
     };
 
-    static const ButcherTable euler{ {0},{{0}},
-                                          {1} };
-    static const ButcherTable heun{ {0,1},{{0,0},
-                                           {1,0}},
-                                    {1.0 / 2.0, 1.0 / 2.0} };
+    static const ButcherTable euler{ {0},{{0}},{1} };
+    static const ButcherTable heun{ {0,1},{{0,0},{1,0}},{1.0 / 2.0, 1.0 / 2.0} };
     static const ButcherTable rk4{ {0,0.5,0.5,1}, {{ 0, 0, 0, 0},{.5, 0, 0, 0},{ 0,.5, 0, 0},{ 0, 0, 1, 0},},{(1.0 / 6.0), (1.0 / 3.0), (1.0 / 3.0), (1.0 / 6.0)} };
 
 
@@ -41,7 +38,7 @@ namespace RungeKutta
 	/// <summary>
 	/// Use Runge-Kutta with complete parameterization
 	/// </summary>
-	void parameterize(IloModel& model, const IloMatrix& y, const IloMatrix& u, const func& Fc, const Matrix& Fy, const Matrix& Fu, double dt, double t0 = 0, ButcherTable table = heun);
+	void parameterize(IloModel& model, const IloMatrix& y, const IloMatrix& u, const func& Fc, const Matrix& Fy, const Matrix& Fu, double dt, double t0 = 0, ButcherTable table = euler);
 
 
     typedef std::tuple<std::vector<Eigen::MatrixXd>, std::vector<double>> ret;
