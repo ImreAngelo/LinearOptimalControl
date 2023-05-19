@@ -30,6 +30,8 @@ namespace RungeKutta
 
     // =====
 
+    int debug = 0;
+
 
 	typedef std::function<double(double)> func;
 	typedef Eigen::Matrix<func, Eigen::Dynamic, Eigen::Dynamic> Matrix;
