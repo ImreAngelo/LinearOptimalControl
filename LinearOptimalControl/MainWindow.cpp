@@ -17,9 +17,9 @@ void Rendering::MainWindow::render()
         auto F0 = Eigen::Matrix<std::function<double(double)>, 1, 1>::Constant([](double t) { return  0.0; });
         auto Fu = Eigen::Matrix<std::function<double(double)>, 1, 1>::Constant([](double t) { return -1.0; });
 
-        auto solution = Linear::solve_t(0, 2, F0(0), F0, Fu, steps);
+        auto solution = Linear::solve_t(0, 4, F0(0), F0, Fu, steps);
 
-        frame = PlotFrame("Example 1", 0, 2, solution.control[0], solution.objective[0]);
+        frame = PlotFrame("Example 1", 0, 4, solution.control[0], solution.objective[0]);
         show = true;
 
 //#ifdef _DEBUG
@@ -37,7 +37,7 @@ void Rendering::MainWindow::render()
     ImGui::SameLine();
 
     if (ImGui::Button("Problem 2")) {
-        auto Fy = Eigen::Matrix<std::function<double(double)>, 1, 1>::Constant([](double t) { return .7; });
+        auto Fy = Eigen::Matrix<std::function<double(double)>, 1, 1>::Constant([](double t) { return -.7; });
         auto Fu = Eigen::Matrix<std::function<double(double)>, 1, 1>::Constant([](double t) { return -1.; });
         auto Fc = [](double t) { return .1*t; };
 
@@ -82,6 +82,9 @@ void Rendering::MainWindow::render()
         //#endif // _DEBUG
     }
 
+    RungeKutta::ButcherTable butcherTable = (RungeKutta::debug == 0) ? RungeKutta::euler :
+                                            (RungeKutta::debug == 1) ? RungeKutta::heun : RungeKutta::rk4;
+
     if (ImGui::Button("Timing Test #1"))
     {
         Eigen::Matrix<std::function<double(double)>, 1, 1> F0, Fy;
@@ -90,7 +93,7 @@ void Rendering::MainWindow::render()
         F0 << [](double t) { return 0.1*t; };
         Fy << [](double t) { return -1.0; };
 
-        auto [r, t] = RungeKutta::solve(y0, F0, Fy, F0, steps, 5.0, 0.0);
+        auto [r, t] = RungeKutta::solve(y0, F0, Fy, F0, steps, 5.0, 0.0, butcherTable);
 
         x = std::vector<double>(steps, 0.0);
         y = std::vector<double>(steps, 0.0);
@@ -119,7 +122,7 @@ void Rendering::MainWindow::render()
         Fy << [](double t) { return a; }, [](double t) { return -b; },
               [](double t) { return c; }, [](double t) { return -d; };
 
-        auto [ r, t ] = RungeKutta::solve(y0, F0, Fy, F0, steps, 5.0, 0.0, RungeKutta::euler);
+        auto [ r, t ] = RungeKutta::solve(y0, F0, Fy, F0, steps, 5.0, 0.0, butcherTable);
 
         x = std::vector<double>(steps, 0.0);
         y = std::vector<double>(steps, 0.0);

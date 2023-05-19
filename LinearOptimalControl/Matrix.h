@@ -55,9 +55,8 @@ namespace MatrixUtil
 
         for (auto i = 0; i < lhs.rows(); i++) {
             for (auto j = 0; j < lhs.cols(); j++) {
-                auto v = lhs(i, j);
                 //std::cout << i << ", " << j << ": " << v << " * " << rhs << std::endl;
-                r(i, j) = v * rhs;
+                r(i, j) = lhs(i, j) * rhs;
             }
         }
 

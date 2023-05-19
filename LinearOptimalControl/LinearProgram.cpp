@@ -192,18 +192,6 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, Func Fc, Matr
     // Complete Parameterization
     RungeKutta::parameterize(model, y, u, Fc, Fy, Fu, dt, t0, butcherTable);
 
-    /*
-    auto eigen_y = Matrix<float>::Constant(2*dim, steps, 2.4f);
-    auto eigen_m = Matrix<float>::Constant(steps, 2*dim, 1.0f);
-
-    TIMER_START("Eigen test");
-    auto result = (eigen_m * eigen_y).sum();
-
-    TIMER_STOP();
-
-    std::cout << result;
-    */
-
     TIMER_START("Build objective");
 
     // Build objective function
@@ -245,6 +233,7 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, Func Fc, Matr
             }
         }
 
+        cplex.end();
         return { control, objective };
     }
     catch (IloException& e) {

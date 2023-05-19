@@ -38,6 +38,7 @@ void RungeKutta::parameterize(IloModel& model, const IloMatrix& y, const IloMatr
         {
             const double ct = t + table.c[i] * dt;
             Eigen::MatrixXd fy = eval(Fy, ct);
+            Eigen::MatrixXd fu = eval(Fu, ct);
 
             // TODO: simply a.row(i) * k
             // sum of a_{i,j} * k_j
@@ -46,19 +47,18 @@ void RungeKutta::parameterize(IloModel& model, const IloMatrix& y, const IloMatr
             // explicit
             for (auto j = 0; j < i; j++)
             {
-                auto intermediate = k[j];
+                auto inter = k[j];
                 for (auto ii = 0; ii < dims; ii++)
                     for (auto jj = 0; jj < dims; jj++)
-                        intermediate(ii, jj) = k[j](ii, jj) * fy(ii, jj) * table.a[i][j];
+                        inter(ii, jj) = inter(ii, jj) * table.a[i][j] * fy(ii, jj);
 
-                sum = intermediate + sum;
+                sum = inter + sum;
             }
 
-            MatrixUtil::Matrix<IloNumExprArg> fyy = mul(fy, y).col(n);
-            //MatrixUtil::Matrix<IloNumExprArg> fyc = mul(fy, sum); // TODO: This line causes problems!
-            MatrixUtil::Matrix<IloNumExprArg> fu = mul(eval(Fu, ct), u).col(n);
+            MatrixUtil::Matrix<IloNumExprArg> _y = mul(fy, y).col(n);
+            MatrixUtil::Matrix<IloNumExprArg> _u = mul(fu, u).col(n);
 
-            MatrixUtil::Matrix<IloNumExprArg> f = (sum + fyy /*+ fyc*/ + fu);
+            MatrixUtil::Matrix<IloNumExprArg> f = (sum + _y + _u);
 
             // dt * f(t_{n+c_i}, y_n + sum)
             auto ki = scalarAdd(scalarMul(f, dt), Fc(ct) * dt);
@@ -67,9 +67,9 @@ void RungeKutta::parameterize(IloModel& model, const IloMatrix& y, const IloMatr
 
         // ===== 
 
-        MatrixUtil::Matrix<IloNumExprArg> ks = makeZero(y(0,0), dims); // scalarMul(k[0], table.b[0]);
+        MatrixUtil::Matrix<IloNumExprArg> ks = scalarMul(k[0], table.b[0]);
 
-        for (auto i = 0; i < table.order; i++)
+        for (auto i = 1; i < table.order; i++)
         {
             auto temp1 = k[i];
             auto temp2 = ks; // scalarMul(k[i], table.b[i]) + ks;
