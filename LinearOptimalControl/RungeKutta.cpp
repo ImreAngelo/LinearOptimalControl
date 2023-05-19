@@ -42,7 +42,7 @@ void RungeKutta::parameterize(IloModel& model, const IloMatrix& y, const IloMatr
 
             // TODO: simply a.row(i) * k
             // sum of a_{i,j} * k_j
-            MatrixUtil::Matrix<IloNumExprArg> sum = makeZero(y(0,0), dims);
+            MatrixUtil::Matrix<IloNumExprArg> sum = makeZero(u(0,0), dims);
           
             // explicit
             for (auto j = 0; j < i; j++)
@@ -55,30 +55,52 @@ void RungeKutta::parameterize(IloModel& model, const IloMatrix& y, const IloMatr
                 sum = inter + sum;
             }
 
-            MatrixUtil::Matrix<IloNumExprArg> _y = mul(fy, y).col(n);
-            MatrixUtil::Matrix<IloNumExprArg> _u = mul(fu, u).col(n);
+            //MatrixUtil::Matrix<IloNumExprArg> _y = mul(fy, y).col(n);
+            //MatrixUtil::Matrix<IloNumExprArg> _u = mul(fu, u).col(n);
 
-            MatrixUtil::Matrix<IloNumExprArg> f = (sum + _y + _u);
+            MatrixUtil::Matrix<IloNumExprArg> _y = scalarMul(y, fy(0, 0)).col(n);
+            MatrixUtil::Matrix<IloNumExprArg> _u = scalarMul(u, fu(0, 0)).col(n);
+
+            //auto _y = makeZero(y(0, 0), dims), _u = makeZero(u(0, 0), dims);
+
+            //for (auto ii = 0; ii < dims; ii++)
+            //    for (auto jj = 0; jj < dims; jj++)
+            //    {
+            //        _y(ii, jj) = fy(ii, jj) * y(ii, n);
+            //        _u(ii, jj) = fu(ii, jj) * u(ii, n);
+            //    }
+
+            MatrixUtil::Matrix<IloNumExprArg> ki = (sum + _y + _u);
+
+            for (auto ii = 0; ii < dims; ii++)
+                for (auto jj = 0; jj < dims; jj++)
+                    ki(ii, jj) = (ki(ii, jj) + Fc(ct)) * dt;
 
             // dt * f(t_{n+c_i}, y_n + sum)
-            auto ki = scalarAdd(scalarMul(f, dt), Fc(ct) * dt);
             k.emplace_back(ki);
         }
 
         // ===== 
 
-        MatrixUtil::Matrix<IloNumExprArg> ks = scalarMul(k[0], table.b[0]);
+        MatrixUtil::Matrix<IloNumExprArg> ks = scalarMul(k[0], table.b[0]); // makeZero(u(0, 0), dims);
 
         for (auto i = 1; i < table.order; i++)
         {
             auto temp1 = k[i];
-            auto temp2 = ks; // scalarMul(k[i], table.b[i]) + ks;
+
+            //for (auto ii = 0; ii < dims; ii++)
+            //    for (auto jj = 0; jj < dims; jj++)
+            //        temp1(ii, jj) = k[i](ii, jj) * table.b[i];
+
+            auto temp2 = ks;
             MatrixUtil::Matrix<IloNumExprArg> temp3 = temp1 + temp2;
             ks = temp3;
+
+            //ks = scalarMul(k[i], table.b[i]) + ks; // This doesnt work!!
         }
 
         for (auto d = 0; d < dims; d++)
-            model.add(y(d, n + 1) == y(d, n) + ks.row(d).sum());
+            model.add(y(d, n + 1) == y(d, n) + ks(d,d));
     }
 
     /*

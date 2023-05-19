@@ -49,7 +49,7 @@ namespace MatrixUtil
 
     // Multiply scalar into matrix
     template <typename T>
-    static inline Matrix<IloNumExprArg> scalarMul(const Matrix<T> lhs, double rhs)
+    static inline Matrix<IloNumExprArg> scalarMul(const Matrix<T>& lhs, double rhs)
     {
         Matrix<IloNumExprArg> r(lhs.rows(), lhs.cols());
 

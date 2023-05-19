@@ -4,7 +4,7 @@
 #include <imgui.h>
 #include "RungeKutta.h"
 
-constexpr int steps = 500;
+constexpr int steps = 200;
 
 void Rendering::MainWindow::render()
 {
@@ -37,7 +37,7 @@ void Rendering::MainWindow::render()
     ImGui::SameLine();
 
     if (ImGui::Button("Problem 2")) {
-        auto Fy = Eigen::Matrix<std::function<double(double)>, 1, 1>::Constant([](double t) { return -.7; });
+        auto Fy = Eigen::Matrix<std::function<double(double)>, 1, 1>::Constant([](double t) { return .7; });
         auto Fu = Eigen::Matrix<std::function<double(double)>, 1, 1>::Constant([](double t) { return -1.; });
         auto Fc = [](double t) { return .1*t; };
 
