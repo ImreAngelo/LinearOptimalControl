@@ -23,8 +23,11 @@ namespace RungeKutta
         }
     };
 
-    static const ButcherTable euler{ {0},{{0}},{1} };
-    static const ButcherTable heun{ {0,1},{{0,0},{1,0}},{1.0 / 2.0, 1.0 / 2.0} };
+    static const ButcherTable euler{ {0},{{0}},
+                                          {1} };
+    static const ButcherTable heun{ {0,1},{{0,0},
+                                           {1,0}},
+                                    {1.0 / 2.0, 1.0 / 2.0} };
     static const ButcherTable rk4{ {0,0.5,0.5,1}, {{ 0, 0, 0, 0},{.5, 0, 0, 0},{ 0,.5, 0, 0},{ 0, 0, 1, 0},},{(1.0 / 6.0), (1.0 / 3.0), (1.0 / 3.0), (1.0 / 6.0)} };
 
 
@@ -38,5 +41,13 @@ namespace RungeKutta
 	/// <summary>
 	/// Use Runge-Kutta with complete parameterization
 	/// </summary>
-	void parameterize(IloModel& model, const IloMatrix& y, const IloMatrix& u, const func& Fc, const Matrix& Fy, const Matrix& Fu, double dt, double t0 = 0, ButcherTable table = euler);
+	void parameterize(IloModel& model, const IloMatrix& y, const IloMatrix& u, const func& Fc, const Matrix& Fy, const Matrix& Fu, double dt, double t0 = 0, ButcherTable table = heun);
+
+
+    typedef std::tuple<std::vector<Eigen::MatrixXd>, std::vector<double>> ret;
+    
+    /// <summary>
+    /// Solve ODE with Runge-Kutta method, included for performance testing (see timing branch)
+    /// </summary>
+    ret solve(const Eigen::MatrixXd& y0, const Matrix& Fc, const Matrix& Fy, const Matrix& Fu, size_t steps, double t1 = 1, double t0 = 0, ButcherTable table = euler);
 };

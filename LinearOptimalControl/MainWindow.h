@@ -12,6 +12,9 @@ namespace Rendering
 	private:
 		PlotFrame frame{"d"};
 		bool show = false;
+
+	private:
+		std::vector<double> time, x, y;
 	};
 }
 

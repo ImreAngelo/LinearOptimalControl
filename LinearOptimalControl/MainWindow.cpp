@@ -2,6 +2,7 @@
 #include "LinearProgram.h"
 #include "Color.h"
 #include <imgui.h>
+#include "RungeKutta.h"
 
 constexpr int steps = 500;
 
@@ -58,32 +59,54 @@ void Rendering::MainWindow::render()
     }
 
     ImGui::SameLine();
-    if (ImGui::Button("Problem 3")) {
-        auto Fc = [](double t) { return 0.0; };
-        Eigen::Matrix<std::function<double(double)>, 2, 2> Fy;
-        Eigen::Matrix<std::function<double(double)>, 2, 2> Fu;
 
-        Fy << [](double t) { return 0.0; }, [](double t) { return 0.0; }, 
+    if (ImGui::Button("Problem 3"))
+    {
+        Eigen::Matrix<std::function<double(double)>, 1, 1> F0, Fy;
+        auto y0 = Eigen::MatrixXd::Constant(1, 1, 1.0);
+
+        F0 << [](double t) { return 0.1*t; };
+        Fy << [](double t) { return -1.0; };
+
+        auto [r, t] = RungeKutta::solve(y0, F0, Fy, F0, steps, 5.0, 0.0);
+
+        x = std::vector<double>(steps, 0.0);
+        y = std::vector<double>(steps, 0.0);
+
+        for (auto i = 0; i < steps; i++)
+        {
+            x[i] = r[i](0, 0);
+            y[i] = 0;
+        }
+
+        time = t;
+    }
+
+    if (ImGui::Button("Runge-Kutta Timing Test"))
+    {
+        constexpr double a = 1, b = 2, c = 3, d = 1;
+
+        Eigen::Matrix<std::function<double(double)>, 2, 2> F0, Fy;
+        auto y0 = Eigen::Matrix2d::Constant(2, 2, 1.0);
+
+        F0 << [](double t) { return 0.0; }, [](double t) { return 0.0; },
               [](double t) { return 0.0; }, [](double t) { return 0.0; };
 
-        Fu << [](double t) { return -1.0; }, [](double t) { return 0.0; },
-              [](double t) { return 0.0; },  [](double t) { return 1.0; };
+        Fy << [](double t) { return a; }, [](double t) { return -b; },
+              [](double t) { return c; }, [](double t) { return -d; };
 
-        auto solution = Linear::solve_t(0, 3, Fc, Fy, Fu, steps);
+        auto [ r, t ] = RungeKutta::solve(y0, F0, Fy, F0, steps, 5.0, 0.0);
 
-        frame = PlotFrame("Example 3", 0, 3, solution.control[0], solution.objective[0]);
-        show = true;
+        x = std::vector<double>(steps, 0.0);
+        y = std::vector<double>(steps, 0.0);
 
-//#ifdef _DEBUG
-//        // print csv for paper 
-//        std::cout << "\nControl 1:\n" << "x, y" << std::endl;
-//        for (auto i = 0; i < solution.control.size(); i++)
-//            std::cout << (2.0 / steps) * i << ", " << std::round(solution.control[i] * 10000) / 10000 << std::endl;
-//
-//        std::cout << "\nObjective 1:\n" << "x, y" << std::endl;
-//        for (auto i = 0; i < solution.objective.size(); i++)
-//            std::cout << (2.0 / steps) * i << ", " << std::round(solution.objective[i] * 10000) / 10000 << std::endl;
-//#endif // _DEBUG
+        for (auto i = 0; i < steps; i++)
+        {
+            x[i] = r[i](0, 0);
+            y[i] = r[i](1, 0);
+        }
+
+        time = t;
     }
 
     ImGui::PopStyleColor();
@@ -93,5 +116,23 @@ void Rendering::MainWindow::render()
 
     if (show) {
         frame.render();
+    } 
+
+    if (x.size() == steps)
+    {
+        ImGui::Begin("Result");
+
+        if (ImPlot::BeginPlot("Runge-Kutta 2D"))
+        {
+            ImPlot::PushStyleColor(ImPlotCol_Line, Color::DYNAMIC);
+            ImPlot::PushStyleColor(ImPlotCol_Line, Color::CONTROL);
+            ImPlot::PlotLine("x(t)", &time[0], &x[0], time.size());
+            ImPlot::PopStyleColor();
+            ImPlot::PlotLine("y(t)", &time[0], &y[0], time.size());
+            ImPlot::PopStyleColor();
+            ImPlot::EndPlot();
+        }
+
+        ImGui::End();
     }
 }

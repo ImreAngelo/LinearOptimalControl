@@ -11,8 +11,8 @@ void RungeKutta::parameterize(IloModel& model, const IloMatrix& y, const IloMatr
     using MatrixUtil::scalarMul;
     using MatrixUtil::scalarAdd;
 
-    const size_t dims = y.rows(); // dimensions
-    const size_t steps = y.cols(); // steps
+    const size_t dims = y.rows();
+    const size_t steps = y.cols();
 
     // y_n+1
     for (auto n = 0; n < steps - 1; n++)
@@ -55,7 +55,7 @@ void RungeKutta::parameterize(IloModel& model, const IloMatrix& y, const IloMatr
             ks = scalarMul(k[i], table.b[i]) + ks;
 
         for (auto d = 0; d < dims; d++)
-            model.add(y(d, n + 1) == y(d, n) + ks.col(d).sum());
+            model.add(y(d, n + 1) == y(d, n) + ks.row(d).sum());
     }
 
     /*
@@ -70,4 +70,54 @@ void RungeKutta::parameterize(IloModel& model, const IloMatrix& y, const IloMatr
             model.add(y(i, j + 1) == y(i, j) + dt * (_c + _y(i, 0) + _u(i, 0)));
     }
     */
+}
+
+RungeKutta::ret RungeKutta::solve(const Eigen::MatrixXd& y0, const Matrix& Fc, const Matrix& Fy, const Matrix& Fu, size_t steps, double t1, double t0, ButcherTable table)
+{
+    TIME_SCOPE("Runge-Kutta (literal types)");
+
+    const size_t dims = Fy.rows();
+    const double dt = (t1 - t0)/steps;
+
+    std::vector<Eigen::MatrixXd> y = { y0 };
+    y.reserve(steps);
+
+    std::vector<double> t;
+    t.reserve(steps);
+
+    for (auto n = 0; n < steps - 1; n++)
+    {
+        std::vector<Eigen::MatrixXd> k;
+        k.reserve(table.order);
+
+        const double tn = n * dt + t0;
+
+        for (auto i = 0; i < table.order; i++)
+        {
+            Eigen::MatrixXd sum = Eigen::MatrixXd::Constant(dims, dims, 0.0);
+
+            for (auto j = 0; j < i; j++)
+            {
+                sum = sum + table.a[i][j] * k[j];
+            }
+
+            const double t = tn + table.c[i] * dt;
+
+            auto fc = MatrixUtil::eval(Fc, t);
+            auto fy = MatrixUtil::eval(Fy, t);
+            //auto fu = MatrixUtil::eval(Fu, t);
+
+            k.emplace_back(dt * (fc + fy * (y[n] + sum)));
+        }
+
+        Eigen::MatrixXd kSum = k[0] * table.b[0];
+
+        for (auto i = 1; i < table.order; i++)
+            kSum = kSum + table.b[i] * k[i];
+
+        y.emplace_back(y[n] + kSum);
+        t.emplace_back(tn);
+    }
+
+    return RungeKutta::ret(y, t);
 }
