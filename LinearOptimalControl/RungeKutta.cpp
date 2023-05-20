@@ -83,12 +83,13 @@ void RungeKutta::parameterize(IloModel& model, const IloMatrix& y, const IloMatr
             /*if (table.b[i] == 0)
                 continue;*/
 
+            auto inter = k[i];
             for (auto ii = 0; ii < dims; ii++)
-                ks(0, ii) = table.b[i] * k[i](0, ii) + ks(0, ii);
+                ks(ii, 0) = table.b[i] * inter(ii, 0) + ks(ii, 0);
         }
 
         for (auto d = 0; d < dims; d++)
-            model.add(y(d, n + 1) == y(d, n) + ks(d,d));
+            model.add(y(d, n + 1) == y(d, n) + ks(d,0));
     }
 }
 

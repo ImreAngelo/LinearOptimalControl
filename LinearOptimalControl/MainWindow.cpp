@@ -65,7 +65,7 @@ void Rendering::MainWindow::render()
         auto Fu = Eigen::Matrix<std::function<double(double)>, 2, 2>::Constant([](double t) { return -1.; });
         auto Fc = [](double t) { return 0; };
 
-        auto [control, objective] = Linear::solve_t(0, 3, Fc, Fy, Fu, steps);
+        auto [control, objective] = Linear::solve_t(0, 3, Fc, Fy, Fu, 200);
 
         frame = PlotFrame("Example", 0, 3, control[0], objective[0]);
         show = true;
