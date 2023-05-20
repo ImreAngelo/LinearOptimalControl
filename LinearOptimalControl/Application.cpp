@@ -42,6 +42,9 @@ void Application::update()
 
     // Swap buffers
     glfwSwapBuffers(window);
+
+    // Wait for update
+    glfwWaitEvents();
 }
 
 bool Application::shouldClose()

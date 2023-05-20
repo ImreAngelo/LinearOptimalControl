@@ -24,7 +24,7 @@ namespace Linear
 
 	Solution solve_t(double t0, double t1, Func Fc, MatrixT Fy, MatrixT Fu, size_t steps);
 	
-	Solution solve(double t0, double t1, size_t steps, Func Fc, MatrixT Fy, MatrixT Fu)
+	Solution solve(double t0, double t1, size_t steps, Func Fc, MatrixT Fy, MatrixT Fu, Func Bc, MatrixT By, MatrixT Bu)
 	{
 		
 	};

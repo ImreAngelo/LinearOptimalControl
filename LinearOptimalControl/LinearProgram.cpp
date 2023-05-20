@@ -9,10 +9,10 @@ using Matrix = MatrixUtil::Matrix<T>;
 /// <summary>
 /// Integrate exp(-p * t) using trapezoidal rule
 /// </summary>
-inline IloNumExprArg integrate(const Matrix<IloNumVar>& y, const double dt, const size_t steps, const double t0 = 0, const double p = 0)
+inline IloNumExprArg integrate(const Matrix<IloNumVar>& y, const Eigen::MatrixXd yPhi, const double dt, const size_t steps, const double t0 = 0, const double p = 0)
 {
     TIMER_START("Build objective");
-
+    
     IloNumExprArg obj = y(0, 0) - y(0, 0);
 
     for (auto i = 0; i < steps - 1; i++)
@@ -20,7 +20,11 @@ inline IloNumExprArg integrate(const Matrix<IloNumVar>& y, const double dt, cons
         double a = t0 + i * dt;
         double b = a + dt;
 
-        obj = obj + ((b - a) / 2 * (std::exp(-p * a) * y(0, i) /*y.col(i).sum()*/ + std::exp(-p * b) * y(0, i + 1) /*y.col(i + 1).sum()*/));
+        for(auto j = 0; j < y.rows(); j++)
+            obj = obj + ((b - a) / 2.0) * (
+                std::exp(-p * a) * (yPhi(0, j) * y(j, i)) + 
+                std::exp(-p * b) * (yPhi(0, j) * y(j, i + 1))
+            );
     }
 
     return obj;
@@ -51,6 +55,20 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, Func Fc, Matr
         }
     }
 
+    // Debug example 3 - TODO: Build algebraic constraints
+    /*if (dim == 2)
+    {
+        constexpr double a = 5.0;
+        constexpr double k1 = 2.0, k2 = 3.0;
+
+        std::cout << "\nExample 3 specifics\n\n";
+        for (auto n = 0; n < steps; n++)
+        {
+            model.add(0 == u(0, n) - (a * u(1, n)));
+            model.add(0 <= y(1, n) - ((1 / k1) * u(0, n)) + ((1 / k2) * u(1, n)));
+        }
+    }*/
+
     // For timing
     RungeKutta::ButcherTable butcherTable = (RungeKutta::debug == 0) ? RungeKutta::euler : 
                                             (RungeKutta::debug == 1) ? RungeKutta::heun : RungeKutta::rk4;
@@ -59,13 +77,14 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, Func Fc, Matr
     RungeKutta::parameterize(model, y, u, Fc, Fy, Fu, dt, t0, butcherTable);
 
     // Build objective function
-    const IloNumExprArg obj = integrate(y, dt, steps);
+    const Eigen::MatrixXd phi = Eigen::MatrixXd::Constant(1, dim, 1.0);
+    const IloNumExprArg obj = integrate(y, phi, dt, steps);
     model.add(IloMinimize(env, obj));
 
     TIMER_START("Set boundary");
 
     // Add boundary conditions
-    // TODO: Function
+    // TODO: Boundary matrices
     for(auto i = 0; i < dim; i++)
         model.add(y(i, 0) == 1);
 

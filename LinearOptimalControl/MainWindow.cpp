@@ -69,9 +69,11 @@ void Rendering::MainWindow::render()
         Fu << [](double t) { return -1.; }, [](double t) { return 0.0; },
               [](double t) { return 0.0; }, [](double t) { return 1.0; };
 
-        auto [control, objective] = Linear::solve_t(0, 3, Fc, Fy, Fu, 200);
+        const double t1 = 2.0;
 
-        frame = PlotFrame("Example", 0, 3, control[0], objective[0]);
+        auto [control, objective] = Linear::solve_t(0, t1, Fc, Fy, Fu, 200);
+
+        frame = PlotFrame("Example", 0, t1, control[1], objective[1]);
         show = true;
 
         //#ifdef _DEBUG
@@ -84,6 +86,13 @@ void Rendering::MainWindow::render()
         //        for (auto i = 0; i < solution.objective[0].size(); i++)
         //            std::cout << (3.0/steps) * i << ", " << std::round(solution.objective[0][i] * 10000)/10000 << std::endl;
         //#endif // _DEBUG
+
+        x = control[0];
+        y = objective[0];
+        time = std::vector<double>(x.size(), 0.0);
+
+        for (auto i = 0; i < x.size(); i++)
+            time[i] = (t1 / steps) * i;
     }
 
     RungeKutta::ButcherTable butcherTable = (RungeKutta::debug == 0) ? RungeKutta::euler :
@@ -156,7 +165,7 @@ void Rendering::MainWindow::render()
         frame.render();
     } 
 
-    if (x.size() == steps)
+    if (time.size() > 0)
     {
         ImGui::Begin("Result");
 
