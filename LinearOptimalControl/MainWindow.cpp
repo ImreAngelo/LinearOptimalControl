@@ -65,6 +65,7 @@ void Rendering::MainWindow::render()
         const auto Fc = [](double t) { return 0; };
 
         Eigen::Matrix<std::function<double(double)>, 2, 2> Fu;
+
         Fu << [](double t) { return -1.; }, [](double t) { return 0.0; },
               [](double t) { return 0.0; }, [](double t) { return 1.0; };
 

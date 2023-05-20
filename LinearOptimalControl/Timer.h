@@ -7,7 +7,7 @@
 //#define TIMER_START() {}
 //#define TIMER_STOP() {}
 //#else
-#define TIME_SCOPE() Timer timer(__func__);
+#define TIME_FUNCTION() Timer timer(__func__);
 #define TIME_SCOPE(name) Timer timer(name);
 #define TIMER_START(name) ManualTimer::start(name);
 #define TIMER_STOP() ManualTimer::stop();
