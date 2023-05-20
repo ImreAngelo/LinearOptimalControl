@@ -173,7 +173,7 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, Func Fc, Matr
     Matrix<IloNumVar> u(dim, steps);
     Matrix<IloNumVar> y(dim, steps);
 
-    // Cheat
+    // Cheat for example 3
     constexpr double max[2] = { DBL_MAX, 0.0 };
     constexpr double min[2] = { 0.0, DBL_MIN };
 
@@ -184,20 +184,13 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, Func Fc, Matr
         }
     }
 
+    RungeKutta::ButcherTable butcherTable = (RungeKutta::debug == 0) ? RungeKutta::euler : 
+                                            (RungeKutta::debug == 1) ? RungeKutta::heun : RungeKutta::rk4;
+
+    // std::cout << "Chose Runge-Kutta method #" << RungeKutta::debug;
+
     // Complete Parameterization
-    RungeKutta::parameterize(model, y, u, Fc, Fy, Fu, dt, t0);
-
-    /*
-    auto eigen_y = Matrix<float>::Constant(2*dim, steps, 2.4f);
-    auto eigen_m = Matrix<float>::Constant(steps, 2*dim, 1.0f);
-
-    TIMER_START("Eigen test");
-    auto result = (eigen_m * eigen_y).sum();
-
-    TIMER_STOP();
-
-    std::cout << result;
-    */
+    RungeKutta::parameterize(model, y, u, Fc, Fy, Fu, dt, t0, butcherTable);
 
     TIMER_START("Build objective");
 
@@ -240,6 +233,7 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, Func Fc, Matr
             }
         }
 
+        cplex.end();
         return { control, objective };
     }
     catch (IloException& e) {
