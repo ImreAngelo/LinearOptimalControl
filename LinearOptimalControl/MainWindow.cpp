@@ -17,9 +17,9 @@ void Rendering::MainWindow::render()
         auto F0 = Eigen::Matrix<std::function<double(double)>, 1, 1>::Constant([](double t) { return  0.0; });
         auto Fu = Eigen::Matrix<std::function<double(double)>, 1, 1>::Constant([](double t) { return -1.0; });
 
-        auto solution = Linear::solve_t(0, 4, F0(0), F0, Fu, steps);
+        auto solution = Linear::solve_t(0, 2, F0(0), F0, Fu, steps);
 
-        frame = PlotFrame("Example 1", 0, 4, solution.control[0], solution.objective[0]);
+        frame = PlotFrame("Example 1", 0, 2, solution.control[0], solution.objective[0]);
         show = true;
 
 //#ifdef _DEBUG
