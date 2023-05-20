@@ -9,7 +9,7 @@ using Matrix = MatrixUtil::Matrix<T>;
 /// <summary>
 /// Integrate exp(-p * t) using trapezoidal rule
 /// </summary>
-inline IloNumExprArg integrate(const Matrix<IloNumVar>& y, const Eigen::MatrixXd yPhi, const double dt, const size_t steps, const double t0 = 0, const double p = 0)
+inline IloNumExprArg integrate(const Matrix<IloNumVar>& y, const Eigen::MatrixXd yPhi, const double dt, const size_t steps, const double t0, const double p)
 {
     TIMER_START("Build objective");
     
@@ -20,7 +20,7 @@ inline IloNumExprArg integrate(const Matrix<IloNumVar>& y, const Eigen::MatrixXd
         double a = t0 + i * dt;
         double b = a + dt;
 
-        for(auto j = 0; j < y.rows(); j++)
+        for (auto j = 0; j < y.rows(); j++)
             obj = obj + ((b - a) / 2.0) * (
                 std::exp(-p * a) * (yPhi(0, j) * y(j, i)) + 
                 std::exp(-p * b) * (yPhi(0, j) * y(j, i + 1))
@@ -30,7 +30,7 @@ inline IloNumExprArg integrate(const Matrix<IloNumVar>& y, const Eigen::MatrixXd
     return obj;
 }
 
-Linear::Solution Linear::solve_t(const double t0, const double t1, Func Fc, MatrixT Fy, MatrixT Fu, const size_t steps)
+Linear::Solution Linear::solve_t(const double t0, const double t1, Func Fc, MatrixT Fy, MatrixT Fu, size_t steps, const Eigen::MatrixXd yPhi, double p)
 {
     TIME_FUNCTION();
 
@@ -44,19 +44,19 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, Func Fc, Matr
     Matrix<IloNumVar> u(dim, steps);
     Matrix<IloNumVar> y(dim, steps);
 
-    // Cheat for example 3
+    // Cheat for example 3 //
     constexpr double max[2] = { DBL_MAX, 0.0 };
     constexpr double min[2] = { 0.0, DBL_MIN };
 
     for (auto j = 0; j < steps; j++) {   // Col
         for (auto i = 0; i < dim; i++) { // Row
-            u(i, j) = dim == 2 ? IloNumVar(env, min[i], max[i]) : IloNumVar(env, 0, 1);
+            u(i, j) = (dim == 2) ? IloNumVar(env, min[i], max[i]) : IloNumVar(env, 0, 1);
             y(i, j) = IloNumVar(env, 0, DBL_MAX);
         }
     }
 
     // Debug example 3 - TODO: Build algebraic constraints
-    /*if (dim == 2)
+    if (dim == 2)
     {
         constexpr double a = 5.0;
         constexpr double k1 = 2.0, k2 = 3.0;
@@ -64,10 +64,10 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, Func Fc, Matr
         std::cout << "\nExample 3 specifics\n\n";
         for (auto n = 0; n < steps; n++)
         {
-            model.add(0 == u(0, n) - (a * u(1, n)));
-            model.add(0 <= y(1, n) - ((1 / k1) * u(0, n)) + ((1 / k2) * u(1, n)));
+            model.add(0 == u(0, n) - a * u(1, n));
+            model.add(0 <= y(1, n) - (1 / k1) * u(0, n) + (1 / k2) * u(1, n));
         }
-    }*/
+    }
 
     // For timing
     RungeKutta::ButcherTable butcherTable = (RungeKutta::debug == 0) ? RungeKutta::euler : 
@@ -77,8 +77,7 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, Func Fc, Matr
     RungeKutta::parameterize(model, y, u, Fc, Fy, Fu, dt, t0, butcherTable);
 
     // Build objective function
-    const Eigen::MatrixXd phi = Eigen::MatrixXd::Constant(1, dim, 1.0);
-    const IloNumExprArg obj = integrate(y, phi, dt, steps);
+    const IloNumExprArg obj = integrate(y, yPhi, dt, steps, t0, p);
     model.add(IloMinimize(env, obj));
 
     TIMER_START("Set boundary");
@@ -120,6 +119,7 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, Func Fc, Matr
     }
     catch (IloException& e) {
         std::cerr << "Concert exception caught: " << e << std::endl;
+        throw "Concert Technology exception";
     }
     catch (...) {
         std::cerr << "An unknown error occured.";

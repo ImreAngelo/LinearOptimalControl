@@ -22,7 +22,7 @@ namespace Linear
 		const MultiVector objective;
 	};
 
-	Solution solve_t(double t0, double t1, Func Fc, MatrixT Fy, MatrixT Fu, size_t steps);
+	Solution solve_t(double t0, double t1, Func Fc, MatrixT Fy, MatrixT Fu, size_t steps, const Eigen::MatrixXd yPhi, double p = 0);
 	
 	Solution solve(double t0, double t1, size_t steps, Func Fc, MatrixT Fy, MatrixT Fu, Func Bc, MatrixT By, MatrixT Bu)
 	{

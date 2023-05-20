@@ -40,19 +40,23 @@ void RungeKutta::parameterize(IloModel& model, const IloMatrix& y, const IloMatr
                     continue;
 
                 // Fy * sum(a*k)
-                for (auto ii = 0; ii < dims; ii++) {
+                for (auto d = 0; d < dims; d++) {
                     IloNumExprArg s = u(0, 0) - u(0, 0);
 
                     for (auto r = 0; r < dims; r++) {
-                        s = s + fy(ii, r) * sum(r, 0);
+                        s = s + fy(d, r) * sum(r, 0);
                     }
 
-                    sum(ii, 0) = s;
+                    sum(d, 0) = s;
                 }
             }
 
-            MatrixUtil::Matrix<IloNumExprArg> _y = mul(fy, y).col(n);
-            MatrixUtil::Matrix<IloNumExprArg> _u = mul(fu, u).col(n);
+            // TODO: MAKE SURE THE DIMENSIONS ARE CORRECT
+            MatrixUtil::Matrix<IloNumVar> yCol = y.col(n);
+            MatrixUtil::Matrix<IloNumVar> uCol = u.col(n);
+
+            MatrixUtil::Matrix<IloNumExprArg> _y = mul(fy, yCol);
+            MatrixUtil::Matrix<IloNumExprArg> _u = mul(fu, uCol);
 
             MatrixUtil::Matrix<IloNumExprArg> ki = (sum + _y + _u);
 

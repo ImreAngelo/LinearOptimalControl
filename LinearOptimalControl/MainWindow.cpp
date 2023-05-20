@@ -14,10 +14,11 @@ void Rendering::MainWindow::render()
     ImGui::PushStyleColor(ImGuiCol_Button, Color::BACKGROUND);
 
     if (ImGui::Button("Problem 1")) {
+        const auto ph = Eigen::MatrixXd::Constant(1, 1, 1.0);
         const auto F0 = Eigen::Matrix<std::function<double(double)>, 1, 1>::Constant([](double t) { return  0.0; });
         const auto Fu = Eigen::Matrix<std::function<double(double)>, 1, 1>::Constant([](double t) { return -1.0; });
 
-        const auto [control, objective] = Linear::solve_t(0, 2, F0(0), F0, Fu, steps);
+        const auto [control, objective] = Linear::solve_t(0, 2, F0(0), F0, Fu, steps, ph);
 
         frame = PlotFrame("Example", 0, 2, control[0], objective[0]);
         show = true;
@@ -37,11 +38,12 @@ void Rendering::MainWindow::render()
     ImGui::SameLine();
 
     if (ImGui::Button("Problem 2")) {
+        const auto ph = Eigen::MatrixXd::Constant(1, 1, 1.0);
         const auto Fy = Eigen::Matrix<std::function<double(double)>, 1, 1>::Constant([](double t) { return .7; });
         const auto Fu = Eigen::Matrix<std::function<double(double)>, 1, 1>::Constant([](double t) { return -1; });
         const auto Fc = [](double t) { return .1*t; };
 
-        const auto [control, objective] = Linear::solve_t(0, 3, Fc, Fy, Fu, steps);
+        const auto [control, objective] = Linear::solve_t(0, 3, Fc, Fy, Fu, steps, ph);
 
         frame = PlotFrame("Example", 0, 3, control[0], objective[0]);
         show = true;
@@ -65,13 +67,16 @@ void Rendering::MainWindow::render()
         const auto Fc = [](double t) { return 0; };
 
         Eigen::Matrix<std::function<double(double)>, 2, 2> Fu;
+        Eigen::Matrix<double, 1, 2> phi;
 
         Fu << [](double t) { return -1.; }, [](double t) { return 0.0; },
               [](double t) { return 0.0; }, [](double t) { return 1.0; };
 
+        phi << 0.0, -1.0;
+
         const double t1 = 2.0;
 
-        auto [control, objective] = Linear::solve_t(0, t1, Fc, Fy, Fu, 200);
+        auto [control, objective] = Linear::solve_t(0, t1, Fc, Fy, Fu, 200, phi, 1);
 
         frame = PlotFrame("Example", 0, t1, control[1], objective[1]);
         show = true;
