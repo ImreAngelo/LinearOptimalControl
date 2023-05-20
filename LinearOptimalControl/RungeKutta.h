@@ -38,10 +38,13 @@ namespace RungeKutta
 	typedef Eigen::Matrix<IloNumVar, Eigen::Dynamic, Eigen::Dynamic> IloMatrix;
 
 	/// <summary>
-	/// Use Runge-Kutta with complete parameterization
+	/// Complete parameterization using Runge-Kutta
 	/// </summary>
 	void parameterize(IloModel& model, const IloMatrix& y, const IloMatrix& u, const func& Fc, const Matrix& Fy, const Matrix& Fu, double dt, double t0 = 0, ButcherTable table = euler);
 
+    
+
+    // For timing
 
     typedef std::tuple<std::vector<Eigen::MatrixXd>, std::vector<double>> ret;
     

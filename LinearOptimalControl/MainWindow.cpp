@@ -4,7 +4,7 @@
 #include <imgui.h>
 #include "RungeKutta.h"
 
-constexpr int steps = 200;
+constexpr int steps = 500;
 
 void Rendering::MainWindow::render()
 {
@@ -14,12 +14,12 @@ void Rendering::MainWindow::render()
     ImGui::PushStyleColor(ImGuiCol_Button, Color::BACKGROUND);
 
     if (ImGui::Button("Problem 1")) {
-        auto F0 = Eigen::Matrix<std::function<double(double)>, 1, 1>::Constant([](double t) { return  0.0; });
-        auto Fu = Eigen::Matrix<std::function<double(double)>, 1, 1>::Constant([](double t) { return -1.0; });
+        const auto F0 = Eigen::Matrix<std::function<double(double)>, 1, 1>::Constant([](double t) { return  0.0; });
+        const auto Fu = Eigen::Matrix<std::function<double(double)>, 1, 1>::Constant([](double t) { return -1.0; });
 
-        auto solution = Linear::solve_t(0, 2, F0(0), F0, Fu, steps);
+        const auto [control, objective] = Linear::solve_t(0, 2, F0(0), F0, Fu, steps);
 
-        frame = PlotFrame("Example 1", 0, 2, solution.control[0], solution.objective[0]);
+        frame = PlotFrame("Example", 0, 2, control[0], objective[0]);
         show = true;
 
 //#ifdef _DEBUG
@@ -37,13 +37,13 @@ void Rendering::MainWindow::render()
     ImGui::SameLine();
 
     if (ImGui::Button("Problem 2")) {
-        auto Fy = Eigen::Matrix<std::function<double(double)>, 1, 1>::Constant([](double t) { return .7; });
-        auto Fu = Eigen::Matrix<std::function<double(double)>, 1, 1>::Constant([](double t) { return -1.; });
-        auto Fc = [](double t) { return .1*t; };
+        const auto Fy = Eigen::Matrix<std::function<double(double)>, 1, 1>::Constant([](double t) { return .7; });
+        const auto Fu = Eigen::Matrix<std::function<double(double)>, 1, 1>::Constant([](double t) { return -1.; });
+        const auto Fc = [](double t) { return .1*t; };
 
-        auto [control, objective] = Linear::solve_t(0, 3, Fc, Fy, Fu, steps);
+        const auto [control, objective] = Linear::solve_t(0, 3, Fc, Fy, Fu, steps);
 
-        frame = PlotFrame("Example 2", 0, 3, control[0], objective[0]);
+        frame = PlotFrame("Example", 0, 3, control[0], objective[0]);
         show = true;
 
 //#ifdef _DEBUG
@@ -61,13 +61,13 @@ void Rendering::MainWindow::render()
     ImGui::SameLine();
 
     if (ImGui::Button("Problem 3")) {
-        auto Fy = Eigen::Matrix<std::function<double(double)>, 1, 1>::Constant([](double t) { return -.7; });
-        auto Fu = Eigen::Matrix<std::function<double(double)>, 1, 1>::Constant([](double t) { return -1.; });
-        auto Fc = [](double t) { return .4 * t; };
+        auto Fy = Eigen::Matrix<std::function<double(double)>, 2, 2>::Constant([](double t) { return -.7; });
+        auto Fu = Eigen::Matrix<std::function<double(double)>, 2, 2>::Constant([](double t) { return -1.; });
+        auto Fc = [](double t) { return 0; };
 
         auto [control, objective] = Linear::solve_t(0, 3, Fc, Fy, Fu, steps);
 
-        frame = PlotFrame("Example 2", 0, 3, control[0], objective[0]);
+        frame = PlotFrame("Example", 0, 3, control[0], objective[0]);
         show = true;
 
         //#ifdef _DEBUG
@@ -141,7 +141,7 @@ void Rendering::MainWindow::render()
     ImGui::SameLine();
     if (ImGui::Button("Heun's Method")) { RungeKutta::debug = 1; }
     ImGui::SameLine();
-    if (ImGui::Button("Classic")) { RungeKutta::debug = 2; }
+    if (ImGui::Button("Classic RK4")) { RungeKutta::debug = 2; }
 
     ImGui::PopStyleColor();
     ImGui::EndGroup();

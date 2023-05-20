@@ -187,7 +187,7 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, Func Fc, Matr
     RungeKutta::ButcherTable butcherTable = (RungeKutta::debug == 0) ? RungeKutta::euler : 
                                             (RungeKutta::debug == 1) ? RungeKutta::heun : RungeKutta::rk4;
 
-    std::cout << "Chose Runge-Kutta method #" << RungeKutta::debug;
+    // std::cout << "Chose Runge-Kutta method #" << RungeKutta::debug;
 
     // Complete Parameterization
     RungeKutta::parameterize(model, y, u, Fc, Fy, Fu, dt, t0, butcherTable);

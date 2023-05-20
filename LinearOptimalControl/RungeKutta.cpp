@@ -74,14 +74,14 @@ void RungeKutta::parameterize(IloModel& model, const IloMatrix& y, const IloMatr
             k.emplace_back(ki);
         }
 
-        // ===== 
+        // ===== y_{n+1}
 
-        MatrixUtil::Matrix<IloNumExprArg> ks = MatrixUtil::Matrix<IloNumExprArg>::Constant(dims, 1, u(0, 0) - u(0, 0)); // scalarMul(k[0], table.b[0]); // makeZero(u(0, 0), dims);
+        MatrixUtil::Matrix<IloNumExprArg> ks = MatrixUtil::Matrix<IloNumExprArg>::Constant(dims, 1, u(0, 0) - u(0, 0));
 
         for (auto i = 0; i < table.order; i++)
         {
-            if (table.b[i] == 0)
-                continue;
+            /*if (table.b[i] == 0)
+                continue;*/
 
             for (auto ii = 0; ii < dims; ii++)
                 ks(0, ii) = table.b[i] * k[i](0, ii) + ks(0, ii);
@@ -90,19 +90,6 @@ void RungeKutta::parameterize(IloModel& model, const IloMatrix& y, const IloMatr
         for (auto d = 0; d < dims; d++)
             model.add(y(d, n + 1) == y(d, n) + ks(d,d));
     }
-
-    /*
-    for (auto j = 0; j < m - 1; j++) {
-        auto t = j * dt + t0;
-
-        auto _c = Fc(t);
-        auto _y = mul(eval(Fy, t), y.col(j));
-        auto _u = mul(eval(Fu, t), u.col(j));
-
-        for (auto i = 0; i < n; i++)
-            model.add(y(i, j + 1) == y(i, j) + dt * (_c + _y(i, 0) + _u(i, 0)));
-    }
-    */
 }
 
 RungeKutta::ret RungeKutta::solve(const Eigen::MatrixXd& y0, const Matrix& Fc, const Matrix& Fy, const Matrix& Fu, size_t steps, double t1, double t0, ButcherTable table)
