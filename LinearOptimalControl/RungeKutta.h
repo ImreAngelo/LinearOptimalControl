@@ -2,11 +2,11 @@
 #include <vector>
 #include "Matrix.h"
 
-// TODO: Fix vector include
+// TODO: Fix wierd vector include
 
 namespace RungeKutta
 {
-    // TODO: Simplify ButcherTable interface (just use a matrix)
+    // TODO: Simplify ButcherTable interface (use matrices)
 
     struct ButcherTable
     {
@@ -20,6 +20,8 @@ namespace RungeKutta
             : order(c.size()), a(a), b(b), c(c)
         {
             assert(c.size() == b.size());
+            assert(a.size() == a[0].size());
+            assert(a.size() == c.size());
         }
     };
 
@@ -28,9 +30,7 @@ namespace RungeKutta
     static const ButcherTable rk4{ {0,.5,.5,1}, {{ 0, 0, 0, 0 },{ .5, 0, 0, 0 },{ 0, .5, 0, 0 },{ 0, 0, 1, 0},},{(1/6.0), (1/3.0), (1/3.0), (1/6.0)} };
 
 
-    // =====
-
-    int debug = 0;
+    // ===== PARAMETERIZATION
 
 
 	typedef std::function<double(double)> func;
@@ -41,10 +41,12 @@ namespace RungeKutta
 	/// Complete parameterization using Runge-Kutta
 	/// </summary>
 	void parameterize(IloModel& model, const IloMatrix& y, const IloMatrix& u, const func& Fc, const Matrix& Fy, const Matrix& Fu, double dt, double t0 = 0, ButcherTable table = euler);
-
     
 
-    // For timing
+    // ===== TIMING
+
+
+    int debug = 0;
 
     typedef std::tuple<std::vector<Eigen::MatrixXd>, std::vector<double>> ret;
     

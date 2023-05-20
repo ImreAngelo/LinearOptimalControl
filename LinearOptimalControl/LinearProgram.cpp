@@ -173,7 +173,7 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, Func Fc, Matr
     Matrix<IloNumVar> u(dim, steps);
     Matrix<IloNumVar> y(dim, steps);
 
-    // Cheat
+    // Cheat for example 3
     constexpr double max[2] = { DBL_MAX, 0.0 };
     constexpr double min[2] = { 0.0, DBL_MIN };
 

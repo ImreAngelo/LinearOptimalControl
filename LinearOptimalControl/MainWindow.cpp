@@ -1,8 +1,8 @@
 #include "MainWindow.h"
 #include "LinearProgram.h"
+#include "RungeKutta.h"
 #include "Color.h"
 #include <imgui.h>
-#include "RungeKutta.h"
 
 constexpr int steps = 500;
 
@@ -22,23 +22,23 @@ void Rendering::MainWindow::render()
         frame = PlotFrame("Example", 0, 2, control[0], objective[0]);
         show = true;
 
-//#ifdef _DEBUG
-//        // print csv for paper 
-//        std::cout << "\nControl:\n" << "x, y" << std::endl;
-//        for (auto i = 0; i < solution.control[0].size(); i++)
-//            std::cout << (2.0/steps) * i << ", " << std::round(solution.control[0][i] * 10000) / 10000 << std::endl;
-//
-//        std::cout << "\nObjective:\n" << "x, y" << std::endl;
-//        for (auto i = 0; i < solution.objective[0].size(); i++)
-//            std::cout << (2.0/steps) * i << ", " << std::round(solution.objective[0][i] * 10000) / 10000 << std::endl;
-//#endif // _DEBUG
+#ifdef _DEBUG
+        // print csv for paper 
+        std::cout << "\nControl:\n" << "x, y" << std::endl;
+        for (auto i = 0; i < control[0].size(); i++)
+            std::cout << (2.0/steps) * i << ", " << std::round(control[0][i] * 10000) / 10000 << std::endl;
+
+        std::cout << "\nObjective:\n" << "x, y" << std::endl;
+        for (auto i = 0; i < objective[0].size(); i++)
+            std::cout << (2.0/steps) * i << ", " << std::round(objective[0][i] * 10000) / 10000 << std::endl;
+#endif // _DEBUG
     }
 
     ImGui::SameLine();
 
     if (ImGui::Button("Problem 2")) {
         const auto Fy = Eigen::Matrix<std::function<double(double)>, 1, 1>::Constant([](double t) { return .7; });
-        const auto Fu = Eigen::Matrix<std::function<double(double)>, 1, 1>::Constant([](double t) { return -1.; });
+        const auto Fu = Eigen::Matrix<std::function<double(double)>, 1, 1>::Constant([](double t) { return -1; });
         const auto Fc = [](double t) { return .1*t; };
 
         const auto [control, objective] = Linear::solve_t(0, 3, Fc, Fy, Fu, steps);
@@ -46,24 +46,27 @@ void Rendering::MainWindow::render()
         frame = PlotFrame("Example", 0, 3, control[0], objective[0]);
         show = true;
 
-//#ifdef _DEBUG
-//        // print csv for paper 
-//        std::cout << "\nControl:\n" << "x, y" << std::endl;
-//        for (auto i = 0; i < solution.control[0].size(); i++)
-//            std::cout << (3.0/steps) *i << ", " << std::round(solution.control[0][i] * 10000) / 10000 << std::endl;
-//
-//        std::cout << "\nObjective:\n" << "x, y" << std::endl;
-//        for (auto i = 0; i < solution.objective[0].size(); i++)
-//            std::cout << (3.0/steps) * i << ", " << std::round(solution.objective[0][i] * 10000)/10000 << std::endl;
-//#endif // _DEBUG
+#ifdef _DEBUG
+        // print csv for paper 
+        std::cout << "\nControl:\n" << "x, y" << std::endl;
+        for (auto i = 0; i < control[0].size(); i++)
+            std::cout << (3.0/steps) *i << ", " << std::round(control[0][i] * 10000) / 10000 << std::endl;
+
+        std::cout << "\nObjective:\n" << "x, y" << std::endl;
+        for (auto i = 0; i < objective[0].size(); i++)
+            std::cout << (3.0/steps) * i << ", " << std::round(objective[0][i] * 10000)/10000 << std::endl;
+#endif // _DEBUG
     }
 
     ImGui::SameLine();
 
     if (ImGui::Button("Problem 3")) {
-        auto Fy = Eigen::Matrix<std::function<double(double)>, 2, 2>::Constant([](double t) { return -.7; });
-        auto Fu = Eigen::Matrix<std::function<double(double)>, 2, 2>::Constant([](double t) { return -1.; });
-        auto Fc = [](double t) { return 0; };
+        const auto Fy = Eigen::Matrix<std::function<double(double)>, 2, 2>::Constant([](double t) { return 0; });
+        const auto Fc = [](double t) { return 0; };
+
+        Eigen::Matrix<std::function<double(double)>, 2, 2> Fu;
+        Fu << [](double t) { return -1.; }, [](double t) { return 0.0; },
+              [](double t) { return 0.0; }, [](double t) { return 1.0; };
 
         auto [control, objective] = Linear::solve_t(0, 3, Fc, Fy, Fu, 200);
 

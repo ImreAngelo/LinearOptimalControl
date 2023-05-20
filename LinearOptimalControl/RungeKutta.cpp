@@ -1,18 +1,6 @@
 #include "RungeKutta.h"
 #include "Timer.h"
 
-//MatrixUtil::Matrix<IloNumExprArg> makeZero(IloNumVar temp, size_t rows, size_t cols)
-//{
-//    MatrixUtil::Matrix<IloNumExprArg> sum(rows, cols);
-//    IloNumExprArg obj = temp - temp;
-//
-//    for (auto i = 0; i < rows; i++)
-//        for (auto j = 0; j < cols; j++)
-//            sum(i, j) = obj;
-//
-//    return sum;
-//}
-
 void RungeKutta::parameterize(IloModel& model, const IloMatrix& y, const IloMatrix& u, const func& Fc, const Matrix& Fy, const Matrix& Fu, double dt, double t0, ButcherTable table)
 {
     TIME_SCOPE("Runge Kutta (parameterization)");
@@ -26,13 +14,14 @@ void RungeKutta::parameterize(IloModel& model, const IloMatrix& y, const IloMatr
     const size_t dims = y.rows();
     const size_t steps = y.cols();
 
-    // y_n+1
     for (auto n = 0; n < steps - 1; n++)
     {
         const auto t = n * dt + t0;
 
         std::vector<MatrixUtil::Matrix<IloNumExprArg>> k;
         k.reserve(table.order);
+
+        // ===== k_i
 
         for (auto i = 0; i < table.order; i++)
         {
