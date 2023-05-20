@@ -9,11 +9,12 @@ using Matrix = MatrixUtil::Matrix<T>;
 /// <summary>
 /// Integrate exp(-p * t) using trapezoidal rule
 /// </summary>
-inline IloNumExprArg integrate(const Matrix<IloNumVar>& y, const Eigen::MatrixXd yPhi, const double dt, const size_t steps, const double t0, const double p)
+inline IloNumExprArg integrate(const IloEnv& env, const Matrix<IloNumVar>& y, const Eigen::MatrixXd yPhi, const double dt, const size_t steps, const double t0, const double p)
 {
     TIMER_START("Build objective");
     
-    IloNumExprArg obj = y(0, 0) - y(0, 0);
+    IloNumVar zero(env, 0, 0);
+    IloNumExprArg obj = zero - zero;
 
     for (auto i = 0; i < steps - 1; i++)
     {
@@ -77,7 +78,7 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, Func Fc, Matr
     RungeKutta::parameterize(model, y, u, Fc, Fy, Fu, dt, t0, butcherTable);
 
     // Build objective function
-    const IloNumExprArg obj = integrate(y, yPhi, dt, steps, t0, p);
+    const IloNumExprArg obj = integrate(env, y, yPhi, dt, steps, t0, p);
     model.add(IloMinimize(env, obj));
 
     TIMER_START("Set boundary");
@@ -114,7 +115,8 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, Func Fc, Matr
             }
         }
 
-        cplex.end();
+        env.end();
+
         return { control, objective };
     }
     catch (IloException& e) {
