@@ -4,7 +4,7 @@
 #include "Color.h"
 #include <imgui.h>
 
-constexpr int steps = 100;
+constexpr int steps = 200;
 
 void Rendering::MainWindow::render()
 {
@@ -77,7 +77,7 @@ void Rendering::MainWindow::render()
         const double t0 = 0;
         const double t1 = 1.0;
 
-        auto [control, state] = Linear::solve_t(t0, t1, Fc, Fy, Fu, 100, phi, 1);
+        auto [control, state] = Linear::solve_t(t0, t1, Fc, Fy, Fu, 200, phi, 1);
 
         frame = PlotFrame("Example", t0, t1, control[1], state[1]);
         show = true;

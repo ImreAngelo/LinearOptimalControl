@@ -61,7 +61,7 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, Func Fc, Matr
     if (dim == 2)
     {
         constexpr double a = 5.0;
-        constexpr float k1 = 2.0f, k2 = 5.0f;
+        constexpr float k1 = 2.0f, k2 = 8.0f;
 
         std::cout << "\nExample 3 specifics\n\n";
         for (auto n = 0; n < steps; n++)
