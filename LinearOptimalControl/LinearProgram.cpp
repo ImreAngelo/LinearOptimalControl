@@ -110,8 +110,6 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, Func Fc, Matr
             obj.reserve(steps - 1);
 
             for (auto j = 0; j < steps - 1; j++) {
-                //std::cout << "(" << i << ", " << j << ")\n"; // << ctrl[j] << " // " << obj[j] << "\n";
-
                 ctrl.emplace_back(cplex.getValue(u(i, j)));
                 obj.emplace_back(cplex.getValue(y(i, j)));
             }

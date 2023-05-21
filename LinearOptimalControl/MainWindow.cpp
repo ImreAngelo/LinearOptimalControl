@@ -76,7 +76,7 @@ void Rendering::MainWindow::render()
 
         const double t1 = 3.0;
 
-        auto [control, objective] = Linear::solve_t(0, t1, Fc, Fy, Fu, 200, phi, 1);
+        auto [control, objective] = Linear::solve_t(0, t1, Fc, Fy, Fu, 100, phi, 1);
 
         frame = PlotFrame("Example", 0, t1, control[1], objective[1]);
         show = true;

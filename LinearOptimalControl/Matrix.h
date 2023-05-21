@@ -13,15 +13,16 @@ namespace MatrixUtil
 
     // Matrices A * B
     template <typename T>
-    static inline Matrix<IloNumExprArg> mul(Matrix<IloNum> lhs, Matrix<T> rhs)
+    static inline Matrix<IloNumExprArg> mul(const Matrix<IloNum> lhs, const Matrix<T> rhs)
     {
         assert(lhs.cols() == rhs.rows());
         Matrix<IloNumExprArg> expr(lhs.rows(), rhs.cols());
 
         for (auto i = 0; i < lhs.rows(); i++) {
             for (auto j = 0; j < rhs.cols(); j++) {
-                IloNumExprArg sum = rhs(0, 0) - rhs(0, 0);
-                for (auto r = 0; r < rhs.rows(); r++) {
+                //std::cout << i << "/" << lhs.rows() << "\n" << j << "/" << rhs.cols() << "\n\n";
+                IloNumExpr sum = lhs(i, 0) * rhs(0, j);
+                for (auto r = 1; r < rhs.rows(); r++) {
                     sum = sum + lhs(i, r) * rhs(r, j);
                 }
 
