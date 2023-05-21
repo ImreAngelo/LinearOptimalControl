@@ -29,7 +29,6 @@ void RungeKutta::parameterize(IloModel& model, const IloMatrix y, const IloMatri
         // *** TODO: 
         //  - Use matrix operations instead of vectors
         //  - I.e. sum = [a.row(i) * k(i)].sum()
-        //  - Try implicit methods
         //  - Rename variables to fit (dims = s)
 
         for (auto i = 0; i < table.order; i++)

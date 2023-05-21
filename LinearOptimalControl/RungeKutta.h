@@ -26,8 +26,9 @@ namespace RungeKutta
         }
     };
 
+    static const ButcherTable backward_euler{ {1},{{1}},{1} };
     static const ButcherTable euler{ {0},{{0}},{1} };
-    static const ButcherTable heun{ {0,1},{{0,0},{1,0}},{1.0 / 2.0, 1.0 / 2.0} };
+    static const ButcherTable heun{ {0, 1}, { {0,0},{1,0} }, { 1.0 / 2.0, 1.0 / 2.0 } };
     static const ButcherTable rk4{ {0,.5,.5,1}, {{ 0, 0, 0, 0 },{ .5, 0, 0, 0 },{ 0, .5, 0, 0 },{ 0, 0, 1, 0},},{(1/6.0), (1/3.0), (1/3.0), (1/6.0)} };
 
 
