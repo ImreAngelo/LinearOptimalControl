@@ -1,49 +1,134 @@
 #include "LinearProgram.h"
-#include <ilcplex/ilocplex.h>
+#include "Matrix.h"
+#include "Timer.h"
+#include "RungeKutta.h"
 
-void LinearProgram::solve(double t0, double t1, size_t n)
+template<typename T>
+using Matrix = MatrixUtil::Matrix<T>;
+
+/// <summary>
+/// Integrate exp(-p * t) using trapezoidal rule
+/// </summary>
+inline IloNumExprArg integrate(const IloEnv& env, const Matrix<IloNumVar>& y, const Eigen::MatrixXd yPhi, const double dt, const size_t steps, const double t0, const double p)
 {
-	float dt = ((t1 - t0) / n);
+    TIMER_START("Build objective");
     
-    dynamics = std::vector<double>(n);
-    control = std::vector<double>(n);
-	
-	IloEnv env;
-	IloModel model(env);
+    IloNumVar zero(env, 0, 0);
+    IloNumExprArg obj = zero - zero;
 
-	IloNumVarArray u(env, n, 0.0, 1.0);
-	IloNumVarArray y(env, n, DBL_MIN, DBL_MAX);
+    for (auto i = 0; i < steps - 1; i++)
+    {
+        double a = t0 + i * dt;
+        double b = a + dt;
 
-    // Constraint on each point u_i (Eulers method)
-    for (auto i = 0; i < n - 1; i++) {
-        auto t = i * dt + t0;
-        model.add(y[i + 1] == y[i] + dt * (-0.8f * u[i]));
+        for (auto j = 0; j < y.rows(); j++)
+            obj = obj + ((b - a) / 2.0) * (
+                std::exp(-p * a) * (yPhi(0, j) * y(j, i)) + 
+                std::exp(-p * b) * (yPhi(0, j) * y(j, i + 1))
+            );
     }
 
-    // Objective = Integral of y
-    IloNumExprArg obj = u[n - 1].asNumExpr();
-    for (auto i = 0; i < n; i++)
-        obj = obj + (y[i] / 2);
+    return obj;
+}
 
+Linear::Solution Linear::solve_t(const double t0, const double t1, Func Fc, MatrixT Fy, MatrixT Fu, size_t steps, const Eigen::MatrixXd yPhi, double p)
+{
+    TIME_FUNCTION();
+
+    const double dt = (t1 - t0) / steps;
+    const size_t dim = Fu.cols();
+
+    IloEnv env;
+    IloModel model(env);
+
+    // Populate matrices
+    Matrix<IloNumVar> u(dim, steps);
+    Matrix<IloNumVar> y(dim, steps);
+
+    // Cheat for example 3 //
+    constexpr float max[2] = { FLT_MAX, 0.0f };
+    constexpr float min[2] = { 0.0f,-FLT_MAX };
+
+    for (auto j = 0; j < steps; j++) {   // Col
+        for (auto i = 0; i < dim; i++) { // Row
+            u(i, j) = (dim == 2) ? IloNumVar(env, min[i], max[i], IloNumVar::Float) : IloNumVar(env, 0, 1);
+            y(i, j) = IloNumVar(env, 0, FLT_MAX);
+        }
+    }
+
+    // Debug example 3 - TODO: Build algebraic constraints from function parameters, see solve()
+    if (dim == 2)
+    {
+        //constexpr double a = -5.0;
+        constexpr float k1 = 2.0f, k2 = 5.0f;
+
+        std::cout << "\nExample 3 specifics\n\n";
+        for (auto n = 0; n < steps; n++)
+        {
+            model.add(0 == u(0, n) - 5 * u(1, n));
+            model.add(0 <= y(1, n) - (1 / k1) * u(0, n) + (1 / k2) * u(1, n));
+        }
+    }
+
+    // For timing
+    RungeKutta::ButcherTable butcherTable = (RungeKutta::debug == 0) ? RungeKutta::euler : 
+                                            (RungeKutta::debug == 1) ? RungeKutta::heun : RungeKutta::rk4;
+
+    // Complete Parameterization
+    RungeKutta::parameterize(model, y, u, Fc, Fy, Fu, dt, t0, butcherTable);
+
+    // Build objective function
+    const IloNumExprArg obj = integrate(env, y, yPhi, dt, steps, t0, p);
     model.add(IloMinimize(env, obj));
 
-    // Initial value
-    model.add(y[0] == 1);
+    TIMER_START("Set boundary");
 
-	try {   
+    // Add boundary conditions
+    // TODO: Boundary matrices
+    for(auto i = 0; i < dim; i++)
+        model.add(y(i, 0) == 1);
+
+    try {
         // Solve
+        TIMER_START("CPLEX");
+
         IloCplex cplex(model);
         cplex.solve();
 
-        for (auto i = 0; i < n; i++) {
-             control[i] = cplex.getValue(u[i]);
-            dynamics[i] = cplex.getValue(y[i]);
+        TIMER_STOP();
+
+        // Output
+        auto control = MultiVector(dim);
+        auto objective = MultiVector(dim);
+
+        for (auto i = 0; i < dim; i++)
+        {
+            auto& ctrl = control[i];
+            auto& obj = objective[i];
+
+            ctrl.reserve(steps - 1);
+            obj.reserve(steps - 1);
+
+            for (auto j = 0; j < steps - 1; j++) {
+                ctrl.emplace_back(cplex.getValue(u(i, j)));
+                obj.emplace_back(cplex.getValue(y(i, j)));
+            }
         }
+
+        env.end();
+
+        return { control, objective };
     }
     catch (IloException& e) {
         std::cerr << "Concert exception caught: " << e << std::endl;
+        throw "Concert Technology exception";
     }
-    catch(...) {
+    catch (...) {
         std::cerr << "An unknown error occured.";
     }
-}
+
+    throw "failed";
+    return {};
+};
+
+

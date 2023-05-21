@@ -22,6 +22,9 @@ void Application::update()
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
+    // Dockspace
+    ImGui::DockSpaceOverViewport();
+
     // Draw all windows
     mainWindow->render();
     /*
@@ -39,6 +42,9 @@ void Application::update()
 
     // Swap buffers
     glfwSwapBuffers(window);
+
+    // Wait for update
+    glfwWaitEvents();
 }
 
 bool Application::shouldClose()
@@ -46,14 +52,13 @@ bool Application::shouldClose()
     return glfwWindowShouldClose(window);
 }
 
-Application::Application(const char* title, bool showWindow)
+Application::Application(const char* title)
 {
     // Initialize GLFW
     glfwInit();
 
     // Create a window
-    glfwWindowHint(GLFW_VISIBLE, showWindow);
-    window = glfwCreateWindow(1920, 1080, title, NULL, NULL);
+    window = glfwCreateWindow(1280, 720, title, NULL, NULL);
 
     // Make the window's context current
     glfwMakeContextCurrent(window);
@@ -64,8 +69,7 @@ Application::Application(const char* title, bool showWindow)
 
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-    //if(!showWindow)
-    //io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+    // io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
     ImGui::StyleColorsDark();
     ImGui_ImplGlfw_InitForOpenGL(window, true);

@@ -31,6 +31,9 @@
     <Filter Include="Source Files\rendering">
       <UniqueIdentifier>{30d8ac30-85cc-4d51-ab8c-6b6c8bf14793}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\eigen">
+      <UniqueIdentifier>{9679280b-9a90-417d-8e59-fa5a3d021581}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -74,6 +77,9 @@
     </ClCompile>
     <ClCompile Include="MainWindow.cpp">
       <Filter>Source Files\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="RungeKutta.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -125,5 +131,113 @@
     <ClInclude Include="Window.h">
       <Filter>Header Files\rendering</Filter>
     </ClInclude>
+    <ClInclude Include="Matrix.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RungeKutta.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Timer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Dependencies\eigen\Eigen\AccelerateSupport">
+      <Filter>Header Files\eigen</Filter>
+    </None>
+    <None Include="..\Dependencies\eigen\Eigen\Cholesky">
+      <Filter>Header Files\eigen</Filter>
+    </None>
+    <None Include="..\Dependencies\eigen\Eigen\CholmodSupport">
+      <Filter>Header Files\eigen</Filter>
+    </None>
+    <None Include="..\Dependencies\eigen\Eigen\Core">
+      <Filter>Header Files\eigen</Filter>
+    </None>
+    <None Include="..\Dependencies\eigen\Eigen\Dense">
+      <Filter>Header Files\eigen</Filter>
+    </None>
+    <None Include="..\Dependencies\eigen\Eigen\Eigen">
+      <Filter>Header Files\eigen</Filter>
+    </None>
+    <None Include="..\Dependencies\eigen\Eigen\Eigenvalues">
+      <Filter>Header Files\eigen</Filter>
+    </None>
+    <None Include="..\Dependencies\eigen\Eigen\Geometry">
+      <Filter>Header Files\eigen</Filter>
+    </None>
+    <None Include="..\Dependencies\eigen\Eigen\Householder">
+      <Filter>Header Files\eigen</Filter>
+    </None>
+    <None Include="..\Dependencies\eigen\Eigen\IterativeLinearSolvers">
+      <Filter>Header Files\eigen</Filter>
+    </None>
+    <None Include="..\Dependencies\eigen\Eigen\Jacobi">
+      <Filter>Header Files\eigen</Filter>
+    </None>
+    <None Include="..\Dependencies\eigen\Eigen\KLUSupport">
+      <Filter>Header Files\eigen</Filter>
+    </None>
+    <None Include="..\Dependencies\eigen\Eigen\LU">
+      <Filter>Header Files\eigen</Filter>
+    </None>
+    <None Include="..\Dependencies\eigen\Eigen\MetisSupport">
+      <Filter>Header Files\eigen</Filter>
+    </None>
+    <None Include="..\Dependencies\eigen\Eigen\OrderingMethods">
+      <Filter>Header Files\eigen</Filter>
+    </None>
+    <None Include="..\Dependencies\eigen\Eigen\PardisoSupport">
+      <Filter>Header Files\eigen</Filter>
+    </None>
+    <None Include="..\Dependencies\eigen\Eigen\PaStiXSupport">
+      <Filter>Header Files\eigen</Filter>
+    </None>
+    <None Include="..\Dependencies\eigen\Eigen\QR">
+      <Filter>Header Files\eigen</Filter>
+    </None>
+    <None Include="..\Dependencies\eigen\Eigen\QtAlignedMalloc">
+      <Filter>Header Files\eigen</Filter>
+    </None>
+    <None Include="..\Dependencies\eigen\Eigen\Sparse">
+      <Filter>Header Files\eigen</Filter>
+    </None>
+    <None Include="..\Dependencies\eigen\Eigen\SparseCholesky">
+      <Filter>Header Files\eigen</Filter>
+    </None>
+    <None Include="..\Dependencies\eigen\Eigen\SparseCore">
+      <Filter>Header Files\eigen</Filter>
+    </None>
+    <None Include="..\Dependencies\eigen\Eigen\SparseLU">
+      <Filter>Header Files\eigen</Filter>
+    </None>
+    <None Include="..\Dependencies\eigen\Eigen\SparseQR">
+      <Filter>Header Files\eigen</Filter>
+    </None>
+    <None Include="..\Dependencies\eigen\Eigen\SPQRSupport">
+      <Filter>Header Files\eigen</Filter>
+    </None>
+    <None Include="..\Dependencies\eigen\Eigen\StdDeque">
+      <Filter>Header Files\eigen</Filter>
+    </None>
+    <None Include="..\Dependencies\eigen\Eigen\StdList">
+      <Filter>Header Files\eigen</Filter>
+    </None>
+    <None Include="..\Dependencies\eigen\Eigen\StdVector">
+      <Filter>Header Files\eigen</Filter>
+    </None>
+    <None Include="..\Dependencies\eigen\Eigen\SuperLUSupport">
+      <Filter>Header Files\eigen</Filter>
+    </None>
+    <None Include="..\Dependencies\eigen\Eigen\SVD">
+      <Filter>Header Files\eigen</Filter>
+    </None>
+    <None Include="..\Dependencies\eigen\Eigen\ThreadPool">
+      <Filter>Header Files\eigen</Filter>
+    </None>
+    <None Include="..\Dependencies\eigen\Eigen\UmfPackSupport">
+      <Filter>Header Files\eigen</Filter>
+    </None>
+    <None Include="imgui.ini" />
   </ItemGroup>
 </Project>

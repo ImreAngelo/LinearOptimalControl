@@ -44,6 +44,7 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
+    <CLRSupport>false</CLRSupport>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -51,6 +52,7 @@
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+    <CLRSupport>false</CLRSupport>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -110,6 +112,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\imgui;$(SolutionDir)Dependencies\implot;$(SolutionDir)Dependencies\glfw\include;$(SolutionDir)\Dependencies\eigen;$(SolutionDir)\Dependencies\cplex\include;$(SolutionDir)\Dependencies\concert\include;</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -118,6 +121,7 @@
       <AdditionalDependencies>cplex2211.lib;ilocplex.lib;concert.lib;opengl32.lib;glfw3.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
       <EntryPointSymbol>
       </EntryPointSymbol>
+      <AdditionalOptions>/FORCE:MULTIPLE %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>
       <Command>copy /Y "$(SolutionDir)Dependencies\cplex\bin\x64_win64\cplex2211.dll" "$(TargetDir)"</Command>
@@ -132,6 +136,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\imgui;$(SolutionDir)Dependencies\implot;$(SolutionDir)Dependencies\glfw\include;$(SolutionDir)\Dependencies\eigen;$(SolutionDir)\Dependencies\cplex\include;$(SolutionDir)\Dependencies\concert\include;</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -142,6 +147,7 @@
       <AdditionalDependencies>cplex2211.lib;ilocplex.lib;concert.lib;opengl32.lib;glfw3.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
       <EntryPointSymbol>
       </EntryPointSymbol>
+      <AdditionalOptions>/FORCE:MULTIPLE %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>
       <Command>copy /Y "$(SolutionDir)Dependencies\cplex\bin\x64_win64\cplex2211.dll" "$(TargetDir)"</Command>
@@ -162,6 +168,7 @@
     <ClCompile Include="MainWindow.cpp" />
     <ClCompile Include="PlotFrame.cpp" />
     <ClCompile Include="Application.cpp" />
+    <ClCompile Include="RungeKutta.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Dependencies\imgui\backends\imgui_impl_glfw.h" />
@@ -177,9 +184,47 @@
     <ClInclude Include="Color.h" />
     <ClInclude Include="LinearProgram.h" />
     <ClInclude Include="MainWindow.h" />
+    <ClInclude Include="Matrix.h" />
     <ClInclude Include="PlotFrame.h" />
     <ClInclude Include="Application.h" />
+    <ClInclude Include="RungeKutta.h" />
+    <ClInclude Include="Timer.h" />
     <ClInclude Include="Window.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Dependencies\eigen\Eigen\AccelerateSupport" />
+    <None Include="..\Dependencies\eigen\Eigen\Cholesky" />
+    <None Include="..\Dependencies\eigen\Eigen\CholmodSupport" />
+    <None Include="..\Dependencies\eigen\Eigen\Core" />
+    <None Include="..\Dependencies\eigen\Eigen\Dense" />
+    <None Include="..\Dependencies\eigen\Eigen\Eigen" />
+    <None Include="..\Dependencies\eigen\Eigen\Eigenvalues" />
+    <None Include="..\Dependencies\eigen\Eigen\Geometry" />
+    <None Include="..\Dependencies\eigen\Eigen\Householder" />
+    <None Include="..\Dependencies\eigen\Eigen\IterativeLinearSolvers" />
+    <None Include="..\Dependencies\eigen\Eigen\Jacobi" />
+    <None Include="..\Dependencies\eigen\Eigen\KLUSupport" />
+    <None Include="..\Dependencies\eigen\Eigen\LU" />
+    <None Include="..\Dependencies\eigen\Eigen\MetisSupport" />
+    <None Include="..\Dependencies\eigen\Eigen\OrderingMethods" />
+    <None Include="..\Dependencies\eigen\Eigen\PardisoSupport" />
+    <None Include="..\Dependencies\eigen\Eigen\PaStiXSupport" />
+    <None Include="..\Dependencies\eigen\Eigen\QR" />
+    <None Include="..\Dependencies\eigen\Eigen\QtAlignedMalloc" />
+    <None Include="..\Dependencies\eigen\Eigen\Sparse" />
+    <None Include="..\Dependencies\eigen\Eigen\SparseCholesky" />
+    <None Include="..\Dependencies\eigen\Eigen\SparseCore" />
+    <None Include="..\Dependencies\eigen\Eigen\SparseLU" />
+    <None Include="..\Dependencies\eigen\Eigen\SparseQR" />
+    <None Include="..\Dependencies\eigen\Eigen\SPQRSupport" />
+    <None Include="..\Dependencies\eigen\Eigen\StdDeque" />
+    <None Include="..\Dependencies\eigen\Eigen\StdList" />
+    <None Include="..\Dependencies\eigen\Eigen\StdVector" />
+    <None Include="..\Dependencies\eigen\Eigen\SuperLUSupport" />
+    <None Include="..\Dependencies\eigen\Eigen\SVD" />
+    <None Include="..\Dependencies\eigen\Eigen\ThreadPool" />
+    <None Include="..\Dependencies\eigen\Eigen\UmfPackSupport" />
+    <None Include="imgui.ini" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
