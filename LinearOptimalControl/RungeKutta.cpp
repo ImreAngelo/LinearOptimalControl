@@ -13,8 +13,6 @@ void RungeKutta::parameterize(IloModel& model, const IloMatrix y, const IloMatri
     const size_t steps = y.cols();
     const IloEnv env = model.getEnv();
 
-    std::cout << "Solving problem of " << dims << " dimensions and " << steps << " steps\n\n";
-
     for (auto n = 0; n < steps - 1; n++)
     {
         const double t = n * dt + t0;
