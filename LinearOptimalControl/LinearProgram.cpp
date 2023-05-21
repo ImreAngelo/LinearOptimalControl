@@ -11,7 +11,7 @@ using Matrix = MatrixUtil::Matrix<T>;
 /// </summary>
 inline IloNumExprArg integrate(const IloEnv& env, const Matrix<IloNumVar>& y, const Eigen::MatrixXd yPhi, const double dt, const size_t steps, const double t0, const double p)
 {
-    TIMER_START("Build objective");
+    TIMER_START("Integration");
     
     IloNumVar zero(env, 0, 0);
     IloNumExprArg obj = zero - zero;
@@ -28,6 +28,7 @@ inline IloNumExprArg integrate(const IloEnv& env, const Matrix<IloNumVar>& y, co
             );
     }
 
+    zero.end(); // This does nothing
     return obj;
 }
 
@@ -59,14 +60,14 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, Func Fc, Matr
     // Debug example 3 - TODO: Build algebraic constraints from function parameters, see solve()
     if (dim == 2)
     {
-        //constexpr double a = -5.0;
-        constexpr float k1 = 2.0f, k2 = 5.0f;
+        constexpr double a = 5.0;
+        constexpr float k1 = 2.0f, k2 = 8.0f;
 
         std::cout << "\nExample 3 specifics\n\n";
         for (auto n = 0; n < steps; n++)
         {
-            model.add(0 == u(0, n) - 5 * u(1, n));
-            model.add(0 <= y(1, n) - (1 / k1) * u(0, n) + (1 / k2) * u(1, n));
+            model.add(0 == u(0, n) + a * u(1, n));
+            model.add(y(1, n) - u(0, n) / k1 + u(1, n) / k2 >= 0);
         }
     }
 

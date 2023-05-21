@@ -3,16 +3,8 @@
 #include <ilcplex/ilocplex.h>
 #include <Eigen/Core>
 
-using Eigen::MatrixXd;
-
-constexpr size_t DEFAULT_STEPSIZE = 500;
-
 namespace Linear
 {
-	/*
-	Solution solve(double t0, double t1, MatrixXd Fc, MatrixXd Fy, MatrixXd Fu);
-	*/
-	
 	typedef std::function<double(double)> Func;
 	typedef Eigen::Matrix<Func, Eigen::Dynamic, Eigen::Dynamic> MatrixT;
 	typedef std::vector<std::vector<double>> MultiVector;
