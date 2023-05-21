@@ -238,6 +238,8 @@
     <None Include="..\Dependencies\eigen\Eigen\UmfPackSupport">
       <Filter>Header Files\eigen</Filter>
     </None>
-    <None Include="imgui.ini" />
+    <None Include="imgui.ini">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

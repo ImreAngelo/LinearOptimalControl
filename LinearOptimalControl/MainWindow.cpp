@@ -18,9 +18,9 @@ void Rendering::MainWindow::render()
         const auto F0 = Eigen::Matrix<std::function<double(double)>, 1, 1>::Constant([](double t) { return  0.0; });
         const auto Fu = Eigen::Matrix<std::function<double(double)>, 1, 1>::Constant([](double t) { return -1.0; });
 
-        const auto [control, objective] = Linear::solve_t(0, 2, F0(0,0), F0, Fu, steps, ph);
+        const auto [ control, state ] = Linear::solve_t(0, 2, F0(0,0), F0, Fu, steps, ph);
 
-        frame = PlotFrame("Example", 0, 2, control[0], objective[0]);
+        frame = PlotFrame("Example", 0, 2, control[0], state[0]);
         show = true;
 
 #ifdef _DEBUG
@@ -30,8 +30,8 @@ void Rendering::MainWindow::render()
             std::cout << (2.0/steps) * i << ", " << std::round(control[0][i] * 10000) / 10000 << std::endl;
 
         std::cout << "\nObjective:\n" << "x, y" << std::endl;
-        for (auto i = 0; i < objective[0].size(); i++)
-            std::cout << (2.0/steps) * i << ", " << std::round(objective[0][i] * 10000) / 10000 << std::endl;
+        for (auto i = 0; i < state[0].size(); i++)
+            std::cout << (2.0/steps) * i << ", " << std::round(state[0][i] * 10000) / 10000 << std::endl;
 #endif // _DEBUG
     }
 
@@ -43,9 +43,9 @@ void Rendering::MainWindow::render()
         const auto Fu = Eigen::Matrix<std::function<double(double)>, 1, 1>::Constant([](double t) { return -1; });
         const auto Fc = [](double t) { return .1*t; };
 
-        const auto [control, objective] = Linear::solve_t(0, 3, Fc, Fy, Fu, steps, ph);
+        const auto [ control, state ] = Linear::solve_t(0, 3, Fc, Fy, Fu, steps, ph);
 
-        frame = PlotFrame("Example", 0, 3, control[0], objective[0]);
+        frame = PlotFrame("Example", 0, 3, control[0], state[0]);
         show = true;
 
 #ifdef _DEBUG
@@ -55,8 +55,8 @@ void Rendering::MainWindow::render()
             std::cout << (3.0/steps) *i << ", " << std::round(control[0][i] * 10000) / 10000 << std::endl;
 
         std::cout << "\nObjective:\n" << "x, y" << std::endl;
-        for (auto i = 0; i < objective[0].size(); i++)
-            std::cout << (3.0/steps) * i << ", " << std::round(objective[0][i] * 10000)/10000 << std::endl;
+        for (auto i = 0; i < state[0].size(); i++)
+            std::cout << (3.0/steps) * i << ", " << std::round(state[0][i] * 10000)/10000 << std::endl;
 #endif // _DEBUG
     }
 
@@ -69,16 +69,17 @@ void Rendering::MainWindow::render()
         Eigen::Matrix<std::function<double(double)>, 2, 2> Fu;
         Eigen::Matrix<double, 1, 2> phi;
 
-        Fu << [](double t) { return -1.; }, [](double t) { return 0.0; },
+        Fu << [](double t) { return -1.0; }, [](double t) { return 0.0; },
               [](double t) { return 0.0; }, [](double t) { return 1.0; };
 
-        phi << 0.0, -1.0;
+        phi << 0.0, 1.0;
 
-        const double t1 = 3.0;
+        const double t0 = 0;
+        const double t1 = 1.0;
 
-        auto [control, objective] = Linear::solve_t(0, t1, Fc, Fy, Fu, 100, phi, 1);
+        auto [control, state] = Linear::solve_t(t0, t1, Fc, Fy, Fu, 100, phi, 1);
 
-        frame = PlotFrame("Example", 0, t1, control[1], objective[1]);
+        frame = PlotFrame("Example", t0, t1, control[1], state[1]);
         show = true;
 
         //#ifdef _DEBUG
@@ -93,11 +94,11 @@ void Rendering::MainWindow::render()
         //#endif // _DEBUG
 
         x = control[0];
-        y = objective[0];
+        y = state[0];
         time = std::vector<double>(x.size(), 0.0);
 
         for (auto i = 0; i < x.size(); i++)
-            time[i] = (t1 / steps) * i;
+            time[i] = ((t1 - t0) / steps) * i;
     }
 
     RungeKutta::ButcherTable butcherTable = (RungeKutta::debug == 0) ? RungeKutta::euler :
