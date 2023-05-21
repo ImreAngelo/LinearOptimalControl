@@ -26,7 +26,7 @@ namespace Linear
 	
 	Solution solve(double t0, double t1, size_t steps, Func Fc, MatrixT Fy, MatrixT Fu, Func Bc, MatrixT By, MatrixT Bu)
 	{
-		
+		throw "error";
 	};
 }
 

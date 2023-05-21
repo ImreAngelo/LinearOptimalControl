@@ -4,7 +4,7 @@
 #include "Color.h"
 #include <imgui.h>
 
-constexpr int steps = 500;
+constexpr int steps = 100;
 
 void Rendering::MainWindow::render()
 {
@@ -18,7 +18,7 @@ void Rendering::MainWindow::render()
         const auto F0 = Eigen::Matrix<std::function<double(double)>, 1, 1>::Constant([](double t) { return  0.0; });
         const auto Fu = Eigen::Matrix<std::function<double(double)>, 1, 1>::Constant([](double t) { return -1.0; });
 
-        const auto [control, objective] = Linear::solve_t(0, 2, F0(0), F0, Fu, steps, ph);
+        const auto [control, objective] = Linear::solve_t(0, 2, F0(0,0), F0, Fu, steps, ph);
 
         frame = PlotFrame("Example", 0, 2, control[0], objective[0]);
         show = true;
@@ -74,7 +74,7 @@ void Rendering::MainWindow::render()
 
         phi << 0.0, -1.0;
 
-        const double t1 = 2.0;
+        const double t1 = 3.0;
 
         auto [control, objective] = Linear::solve_t(0, t1, Fc, Fy, Fu, 200, phi, 1);
 

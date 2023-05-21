@@ -1,100 +1,80 @@
 #include "RungeKutta.h"
 #include "Timer.h"
 
-void RungeKutta::parameterize(IloModel& model, const IloMatrix& y, const IloMatrix& u, const func& Fc, const Matrix& Fy, const Matrix& Fu, double dt, double t0, ButcherTable table)
+template<typename T>
+using Matrix = MatrixUtil::Matrix<T>;
+
+void RungeKutta::parameterize(IloModel& model, const IloMatrix y, const IloMatrix u, const func& Fc, const FMatrix& Fy, const FMatrix& Fu, double dt, double t0, ButcherTable table)
 {
     TIME_SCOPE("Runge Kutta (parameterization)");
 
-    using MatrixUtil::mul;
-    using MatrixUtil::eval;
-    using MatrixUtil::add;
-    using MatrixUtil::scalarMul;
-    using MatrixUtil::scalarAdd;
+    //using MatrixUtil::mul;
+    //using MatrixUtil::eval;
+    //using MatrixUtil::add;
+    //using MatrixUtil::scalarMul;
+    //using MatrixUtil::scalarAdd;
 
     const size_t dims = y.rows();
     const size_t steps = y.cols();
+    const IloEnv env = model.getEnv();
 
-    IloNumVar temp(model.getEnv(), 0, 0);
-    IloNumExprArg zero = temp - temp;
+    assert(dims == 1);
+
+    std::cout << "Solving problem of " << dims << " dimensions and " << steps << " steps\n\n";
 
     for (auto n = 0; n < steps - 1; n++)
     {
-        const auto t = n * dt + t0;
+        const double t = n * dt + t0;
 
-        std::vector<MatrixUtil::Matrix<IloNumExprArg>> k; // (steps, MatrixUtil::Matrix<IloNumExprArg>::Constant(dims, 1, zero));
-        k.reserve(table.order);
+        Matrix<IloNumVar> k(table.order, 1);
+        for (auto i = 0; i < table.order; i++)
+            k(i) = IloNumVar(env, -FLT_MAX, FLT_MAX);
 
-        // ===== k_i
+        // ===== Intermediary step
+        // *** TODO: 
+        //  - Use matrix operations instead of vectors
+        //  - I.e. sum = [a.row(i) * k(i)].sum()
+        //  - Try implicit methods
+        //  - Rename variables to fit (dims = s)
 
-        // TODO: MAKE SURE THE DIMENSIONS ARE CORRECT
         for (auto i = 0; i < table.order; i++)
         {
+            // Sum of a_{i,j} * k_j
+            IloNumExpr sum = k(0) * table.a[i][0];
+
+            // Implicit
+            for (auto j = 1; j < table.order; j++)
+                sum = sum + k(j) * table.a[i][j];
+
+            // Build function
             const double ct = t + table.c[i] * dt;
-            Eigen::MatrixXd fy = eval(Fy, ct);
-            Eigen::MatrixXd fu = eval(Fu, ct);
 
-            //// TODO: simply a.row(i) * k
-            //// sum of a_{i,j} * k_j
-            MatrixUtil::Matrix<IloNumExprArg> sum = MatrixUtil::Matrix<IloNumExprArg>::Constant(dims, 1, zero);
-          
-            // explicit
-            for (auto j = 0; j < i; j++)
-            {
-                if (table.a[i][j] == 0)
-                    continue;
+            //Eigen::MatrixXd fc = Eigen::MatrixXd::Constant(dims, dims, Fc(ct));
+            Eigen::MatrixXd fy = MatrixUtil::eval(Fy, ct);
+            Eigen::MatrixXd fu = MatrixUtil::eval(Fu, ct);
 
-                auto inter = k[j];
+            //for(auto d = 0; d < dims; d++)
+            //{
+                auto _c = Fc(ct); // fc.col(d).sum();
+                auto _y = fy(0,0) * y(0, n) + fy(0, 0) * sum;
+                auto _u = fu(0,0) * u(0, n);
 
-                for (auto d = 0; d < dims; d++)
-                    inter(d, 0) = inter(d, 0) * table.a[i][j];
-
-                sum = inter + sum;
-
-                //// Fy * sum(a*k)
-                //for (auto d = 0; d < dims; d++) {
-                //    //IloNumExprArg s = zero;
-
-                //    //for (auto r = 0; r < dims; r++) {
-                //    //    s = s + fy(d, r) * sum(r, 0); // table.a[i][j] * k[j](r, 0);
-                //    //}
-
-                //    //sum(d, 0) = s + sum(d, 0);
-                //}
-            }
-
-            auto _s = mul(fy, sum);
-            auto _y = mul(fy, (IloMatrix)(y.col(n)));
-            auto _u = mul(fu, (IloMatrix)(u.col(n)));
-
-            MatrixUtil::Matrix<IloNumExprArg> ki = (_s + _y + _u);
-
-            for (auto d = 0; d < dims; d++)
-                ki(d, 0) = (ki(d, 0) + Fc(ct)) * dt;
-
-            // dt * f(t_{n+c_i}, y_n + sum)
-            k.emplace_back(ki);
+                model.add(k(i) == dt * (_c + _y + _u));
+            //}
         }
 
         // ===== y_{n+1}
 
-        MatrixUtil::Matrix<IloNumExprArg> ks = MatrixUtil::Matrix<IloNumExprArg>::Constant(dims, 1, zero);
+        IloNumExpr biki = k(0) * table.b[0];
 
-        for (auto i = 0; i < table.order; i++)
-        {
-            /*if (table.b[i] == 0)
-                continue;*/
+        for (auto i = 1; i < table.order; i++)
+            biki = biki + k(i) * table.b[i];
 
-            auto inter = k[i];
-            for (auto d = 0; d < dims; d++)
-                ks(d, 0) = table.b[i] * inter(d, 0) + ks(d, 0);
-        }
-
-        for (auto d = 0; d < dims; d++)
-            model.add(y(d, n + 1) == y(d, n) + ks(d,0));
+        model.add(y(0, n + 1) == y(0, n) + biki);
     }
 }
 
-RungeKutta::ret RungeKutta::solve(const Eigen::MatrixXd& y0, const Matrix& Fc, const Matrix& Fy, const Matrix& Fu, size_t steps, double t1, double t0, ButcherTable table)
+RungeKutta::ret RungeKutta::solve(const Eigen::MatrixXd& y0, const FMatrix& Fc, const FMatrix& Fy, const FMatrix& Fu, size_t steps, double t1, double t0, ButcherTable table)
 {
     TIME_SCOPE("Runge-Kutta (literal types)");
 

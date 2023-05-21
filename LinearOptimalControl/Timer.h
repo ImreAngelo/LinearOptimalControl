@@ -23,8 +23,8 @@ struct Timer
 
 	~Timer()
 	{
-		auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start);
-		std::cout << "\n[Timer] " << name << ": " << duration.count() << " ms\n";
+		auto duration = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start);
+		std::cout << "\n[Timer] " << name << ": " << duration.count() << " " << (char)(230) << "s\n";
 	}
 };
 

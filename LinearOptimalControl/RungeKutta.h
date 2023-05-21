@@ -22,6 +22,7 @@ namespace RungeKutta
             assert(c.size() == b.size());
             assert(a.size() == a[0].size());
             assert(a.size() == c.size());
+            assert(order > 0);
         }
     };
 
@@ -34,13 +35,13 @@ namespace RungeKutta
 
 
 	typedef std::function<double(double)> func;
-	typedef Eigen::Matrix<func, Eigen::Dynamic, Eigen::Dynamic> Matrix;
+	typedef Eigen::Matrix<func, Eigen::Dynamic, Eigen::Dynamic> FMatrix;
 	typedef Eigen::Matrix<IloNumVar, Eigen::Dynamic, Eigen::Dynamic> IloMatrix;
 
 	/// <summary>
 	/// Complete parameterization using Runge-Kutta
 	/// </summary>
-	void parameterize(IloModel& model, const IloMatrix& y, const IloMatrix& u, const func& Fc, const Matrix& Fy, const Matrix& Fu, double dt, double t0 = 0, ButcherTable table = euler);
+	void parameterize(IloModel& model, const IloMatrix y, const IloMatrix u, const func& Fc, const FMatrix& Fy, const FMatrix& Fu, double dt, double t0 = 0, ButcherTable table = euler);
     
 
     // ===== TIMING
@@ -53,5 +54,5 @@ namespace RungeKutta
     /// <summary>
     /// Solve ODE with Runge-Kutta method, included for performance testing (see timing branch)
     /// </summary>
-    ret solve(const Eigen::MatrixXd& y0, const Matrix& Fc, const Matrix& Fy, const Matrix& Fu, size_t steps, double t1 = 1, double t0 = 0, ButcherTable table = euler);
+    ret solve(const Eigen::MatrixXd& y0, const FMatrix& Fc, const FMatrix& Fy, const FMatrix& Fu, size_t steps, double t1 = 1, double t0 = 0, ButcherTable table = euler);
 };

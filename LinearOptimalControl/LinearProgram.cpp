@@ -46,13 +46,13 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, Func Fc, Matr
     Matrix<IloNumVar> y(dim, steps);
 
     // Cheat for example 3 //
-    constexpr double max[2] = { DBL_MAX, 0.0 };
-    constexpr double min[2] = { 0.0, DBL_MIN };
+    constexpr float max[2] = { FLT_MAX, 0.0f };
+    constexpr float min[2] = { 0.0f,-FLT_MAX };
 
     for (auto j = 0; j < steps; j++) {   // Col
         for (auto i = 0; i < dim; i++) { // Row
-            u(i, j) = (dim == 2) ? IloNumVar(env, min[i], max[i]) : IloNumVar(env, 0, 1);
-            y(i, j) = IloNumVar(env, 0, DBL_MAX);
+            u(i, j) = (dim == 2) ? IloNumVar(env, min[i], max[i], IloNumVar::Float) : IloNumVar(env, 0, 1);
+            y(i, j) = IloNumVar(env, 0, FLT_MAX);
         }
     }
 
@@ -60,7 +60,7 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, Func Fc, Matr
     if (dim == 2)
     {
         constexpr double a = 5.0;
-        constexpr double k1 = 2.0, k2 = 3.0;
+        constexpr double k1 = 2.0, k2 = 5.0;
 
         std::cout << "\nExample 3 specifics\n\n";
         for (auto n = 0; n < steps; n++)
@@ -110,6 +110,8 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, Func Fc, Matr
             obj.reserve(steps - 1);
 
             for (auto j = 0; j < steps - 1; j++) {
+                //std::cout << "(" << i << ", " << j << ")\n"; // << ctrl[j] << " // " << obj[j] << "\n";
+
                 ctrl.emplace_back(cplex.getValue(u(i, j)));
                 obj.emplace_back(cplex.getValue(y(i, j)));
             }
