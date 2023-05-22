@@ -11,7 +11,10 @@ void Rendering::MainWindow::render()
     ImGui::BeginGroup();
     ImGui::PushStyleColor(ImGuiCol_FrameBg, Color::FOREGROUND);
     ImGui::PushStyleColor(ImGuiCol_Button, Color::FOREGROUND);
-    ImGui::PushStyleColor(ImGuiCol_WindowBg, Color::FOREGROUND);
+    ImGui::PushStyleColor(ImGuiCol_WindowBg, Color::BACKGROUND);
+    ImGui::PushStyleColor(ImGuiCol_Header, Color::FOREGROUND);
+
+    ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(5.0f, 5.0f));
 
     // ===== Example Problems
 
@@ -177,6 +180,9 @@ void Rendering::MainWindow::render()
 
     // ===== End GUI
 
+    ImGui::PopStyleVar();
+    ImGui::PopStyleColor();
+    ImGui::PopStyleColor();
     ImGui::PopStyleColor();
     ImGui::PopStyleColor();
     ImGui::EndGroup();
@@ -199,9 +205,9 @@ void Rendering::MainWindow::render()
 
         if (ImPlot::BeginPlot("Runge-Kutta 2D"))
         {
+            ImPlot::PushStyleColor(ImPlotCol_FrameBg, Color::BACKGROUND);
             ImPlot::PushStyleColor(ImPlotCol_Line, Color::DYNAMIC);
             ImPlot::PushStyleColor(ImPlotCol_Line, Color::CONTROL);
-            ImPlot::PushStyleColor(ImPlotCol_FrameBg, Color::FOREGROUND);
             ImPlot::PlotLine("x(t)", &time[0], &x[0], time.size());
             ImPlot::PopStyleColor();
             ImPlot::PlotLine("y(t)", &time[0], &y[0], time.size());

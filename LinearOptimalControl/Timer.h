@@ -1,12 +1,13 @@
 #pragma once
+
+#ifdef _DEBUG
+#define TIME_FUNCTION() {}
+#define TIMER_START() {}
+#define TIMER_STOP() {}
+#else
 #include <chrono>
 #include <iostream>
 
-//#ifndef _DEBUG
-//#define TIME_FUNCTION() {}
-//#define TIMER_START() {}
-//#define TIMER_STOP() {}
-//#else
 #define TIME_FUNCTION() Timer timer(__func__);
 #define TIME_SCOPE(name) Timer timer(name);
 #define TIMER_START(name) ManualTimer::start(name);
@@ -47,4 +48,4 @@ namespace ManualTimer
 	};
 };
 
-//#endif // _DEBUG
+#endif // _DEBUG
