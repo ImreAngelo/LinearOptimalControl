@@ -18,7 +18,7 @@ void Rendering::MainWindow::render()
         const auto F0 = Eigen::Matrix<std::function<double(double)>, 1, 1>::Constant([](double t) { return  0.0; });
         const auto Fu = Eigen::Matrix<std::function<double(double)>, 1, 1>::Constant([](double t) { return -1.0; });
 
-        const auto [ control, state ] = Linear::solve_t(0, 2, F0(0,0), F0, Fu, steps, ph);
+        const auto [ control, state ] = Linear::solve_t(0, 2, RungeKutta::getTable(method), F0(0,0), F0, Fu, steps, ph);
 
         frame = PlotFrame("Example", 0, 2, control[0], state[0]);
         show = true;
@@ -43,7 +43,7 @@ void Rendering::MainWindow::render()
         const auto Fu = Eigen::Matrix<std::function<double(double)>, 1, 1>::Constant([](double t) { return -1; });
         const auto Fc = [](double t) { return .1*t; };
 
-        const auto [ control, state ] = Linear::solve_t(0, 3, Fc, Fy, Fu, steps, ph);
+        const auto [ control, state ] = Linear::solve_t(0, 3, RungeKutta::getTable(method), Fc, Fy, Fu, steps, ph);
 
         frame = PlotFrame("Example", 0, 3, control[0], state[0]);
         show = true;
@@ -77,7 +77,7 @@ void Rendering::MainWindow::render()
         const double t0 = 0;
         const double t1 = 1.0;
 
-        auto [control, state] = Linear::solve_t(t0, t1, Fc, Fy, Fu, 200, phi, 1);
+        auto [control, state] = Linear::solve_t(t0, t1, RungeKutta::getTable(method), Fc, Fy, Fu, 50, phi, 1);
 
         frame = PlotFrame("Example", t0, t1, control[1], state[1]);
         show = true;
@@ -101,9 +101,6 @@ void Rendering::MainWindow::render()
             time[i] = ((t1 - t0) / steps) * i;
     }
 
-    RungeKutta::ButcherTable butcherTable = (RungeKutta::debug == 0) ? RungeKutta::euler :
-                                            (RungeKutta::debug == 1) ? RungeKutta::heun : RungeKutta::rk4;
-
     if (ImGui::Button("Timing Test #1"))
     {
         Eigen::Matrix<std::function<double(double)>, 1, 1> F0, Fy;
@@ -112,7 +109,7 @@ void Rendering::MainWindow::render()
         F0 << [](double t) { return 0.1*t; };
         Fy << [](double t) { return -1.0; };
 
-        auto [r, t] = RungeKutta::solve(y0, F0, Fy, F0, steps, 5.0, 0.0, butcherTable);
+        auto [r, t] = RungeKutta::solve(y0, F0, Fy, F0, steps, 5.0, 0.0, RungeKutta::getTable(method));
 
         x = std::vector<double>(steps, 0.0);
         y = std::vector<double>(steps, 0.0);
@@ -141,7 +138,7 @@ void Rendering::MainWindow::render()
         Fy << [](double t) { return a; }, [](double t) { return -b; },
               [](double t) { return c; }, [](double t) { return -d; };
 
-        auto [ r, t ] = RungeKutta::solve(y0, F0, Fy, F0, steps, 5.0, 0.0, butcherTable);
+        auto [ r, t ] = RungeKutta::solve(y0, F0, Fy, F0, steps, 5.0, 0.0, RungeKutta::getTable(method));
 
         x = std::vector<double>(steps, 0.0);
         y = std::vector<double>(steps, 0.0);
@@ -155,12 +152,21 @@ void Rendering::MainWindow::render()
         time = t;
     }
 
-    // DEBUGGING
-    if (ImGui::Button("Eulers Method")) { RungeKutta::debug = 0; }
-    ImGui::SameLine();
-    if (ImGui::Button("Heun's Method")) { RungeKutta::debug = 1; }
-    ImGui::SameLine();
-    if (ImGui::Button("Classic RK4")) { RungeKutta::debug = 2; }
+    //// DEBUGGING
+    //if (ImGui::Button("Eulers Method")) { RungeKutta::debug = 0; }
+    //ImGui::SameLine();
+    //if (ImGui::Button("Heun's Method")) { RungeKutta::debug = 1; }
+    //ImGui::SameLine();
+    //if (ImGui::Button("Classic RK4")) { RungeKutta::debug = 2; }
+
+    // ===== Runge-Kutta Method Select
+
+    const char* items[] = { "Eulers Method", "Implicit Euler", "Heun's 2nd Order Method", "Classic RK4" };
+
+    ImGui::Text("Runge-Kutta Method");
+    ImGui::ListBox("", &method, items, IM_ARRAYSIZE(items), 4);
+
+    // =====
 
     ImGui::PopStyleColor();
     ImGui::EndGroup();

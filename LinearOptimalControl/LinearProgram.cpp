@@ -1,7 +1,6 @@
 #include "LinearProgram.h"
 #include "Matrix.h"
 #include "Timer.h"
-#include "RungeKutta.h"
 
 template<typename T>
 using Matrix = MatrixUtil::Matrix<T>;
@@ -32,7 +31,7 @@ inline IloNumExprArg integrate(const IloEnv& env, const Matrix<IloNumVar>& y, co
     return obj;
 }
 
-Linear::Solution Linear::solve_t(const double t0, const double t1, Func Fc, MatrixT Fy, MatrixT Fu, size_t steps, const Eigen::MatrixXd yPhi, double p)
+Linear::Solution Linear::solve_t(const double t0, const double t1, RungeKutta::ButcherTable butcherTable, Func Fc, MatrixT Fy, MatrixT Fu, size_t steps, const Eigen::MatrixXd yPhi, double p)
 {
     TIME_FUNCTION();
 
@@ -70,10 +69,6 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, Func Fc, Matr
             model.add(y(1, n) - u(0, n) / k1 + u(1, n) / k2 >= 0);
         }
     }
-
-    // For timing
-    RungeKutta::ButcherTable butcherTable = (RungeKutta::debug == 0) ? RungeKutta::euler : 
-                                            (RungeKutta::debug == 1) ? RungeKutta::heun : RungeKutta::rk4;
 
     // Complete Parameterization
     RungeKutta::parameterize(model, y, u, Fc, Fy, Fu, dt, t0, butcherTable);

@@ -44,11 +44,21 @@ namespace RungeKutta
 	/// </summary>
 	void parameterize(IloModel& model, const IloMatrix y, const IloMatrix u, const func& Fc, const FMatrix& Fy, const FMatrix& Fu, double dt, double t0 = 0, ButcherTable table = euler);
     
+    ButcherTable getTable(int method)
+    {
+        switch (method)
+        {
+        default:
+        case 0: return RungeKutta::euler;
+        case 1: return RungeKutta::backward_euler;
+        case 2: return RungeKutta::heun;
+        case 3: return RungeKutta::rk4;
+        }
+    }
+
 
     // ===== TIMING
 
-
-    int debug = 0;
 
     typedef std::tuple<std::vector<Eigen::MatrixXd>, std::vector<double>> ret;
     
