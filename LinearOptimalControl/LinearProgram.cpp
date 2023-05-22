@@ -45,7 +45,7 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, RungeKutta::B
     Matrix<IloNumVar> u(dim, steps);
     Matrix<IloNumVar> y(dim, steps);
 
-    // Cheat for example 3 //
+    // Cheat for example 3 - TODO: Take lb & ub as parameters
     constexpr float max[2] = { FLT_MAX, 0.0f };
     constexpr float min[2] = { 0.0f,-FLT_MAX };
 
@@ -62,7 +62,6 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, RungeKutta::B
         constexpr double a = 5.0;
         constexpr float k1 = 2.0f, k2 = 8.0f;
 
-        std::cout << "\nExample 3 specifics\n\n";
         for (auto n = 0; n < steps; n++)
         {
             model.add(0 == u(0, n) + a * u(1, n));
@@ -80,7 +79,7 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, RungeKutta::B
     TIMER_START("Set boundary");
 
     // Add boundary conditions
-    // TODO: Boundary matrices
+    // TODO: Boundary matrices as function parameters
     for(auto i = 0; i < dim; i++)
         model.add(y(i, 0) == 1);
 
@@ -89,6 +88,13 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, RungeKutta::B
         TIMER_START("CPLEX");
 
         IloCplex cplex(model);
+
+#ifdef _DEBUG
+        std::cout << "\n[CPLEX] ";
+#else
+        cplex.setOut(env.getNullStream());
+#endif // _DEBUG
+
         cplex.solve();
 
         TIMER_STOP();
@@ -116,15 +122,15 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, RungeKutta::B
         return { control, objective };
     }
     catch (IloException& e) {
-        std::cerr << "Concert exception caught: " << e << std::endl;
-        throw "Concert Technology exception";
+        std::cerr << "\n[Error] Concert exception caught: " << e;
     }
     catch (...) {
-        std::cerr << "An unknown error occured.";
+        std::cerr << "\n[Error] An unknown error occured.";
     }
 
-    throw "failed";
-    return {};
+    std::cerr << "\n[Error] Could not solve, returning 0\n\n";
+    std::vector<double> zero(steps, 0);
+    return { MultiVector(dim, zero), MultiVector(dim, zero) };
 };
 
 

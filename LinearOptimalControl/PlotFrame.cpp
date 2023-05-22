@@ -18,7 +18,9 @@ void Rendering::PlotFrame::render()
     if (ImPlot::BeginPlot("Control"))
     {
         ImPlot::PushStyleColor(ImPlotCol_Line, Color::CONTROL);
+        ImPlot::PushStyleColor(ImPlotCol_FrameBg, Color::FOREGROUND);
         ImPlot::PlotLine("u(t)", &linspace(t0, t1, control.size())[0], &control[0], control.size());
+        ImPlot::PopStyleColor();
         ImPlot::PopStyleColor();
         ImPlot::EndPlot();
     }
@@ -26,7 +28,9 @@ void Rendering::PlotFrame::render()
     if (ImPlot::BeginPlot("Objective"))
     {
         ImPlot::PushStyleColor(ImPlotCol_Line, Color::DYNAMIC);
+        ImPlot::PushStyleColor(ImPlotCol_FrameBg, Color::FOREGROUND);
         ImPlot::PlotLine("y(t)", &linspace(t0, t1, dynamic.size())[0], &dynamic[0], dynamic.size());
+        ImPlot::PopStyleColor();
         ImPlot::PopStyleColor();
         ImPlot::EndPlot();
     }

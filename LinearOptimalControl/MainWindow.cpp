@@ -9,7 +9,9 @@ void Rendering::MainWindow::render()
     ImGui::Begin("Menu");
 
     ImGui::BeginGroup();
-    ImGui::PushStyleColor(ImGuiCol_Button, Color::BACKGROUND);
+    ImGui::PushStyleColor(ImGuiCol_FrameBg, Color::FOREGROUND);
+    ImGui::PushStyleColor(ImGuiCol_Button, Color::FOREGROUND);
+    ImGui::PushStyleColor(ImGuiCol_WindowBg, Color::FOREGROUND);
 
     // ===== Example Problems
 
@@ -149,6 +151,11 @@ void Rendering::MainWindow::render()
     ImGui::InputInt("Steps", &steps, 1, 25);
     steps = std::min(std::max(steps, 2), 500);
 
+    // ===== TODO: Calculate on button press
+
+    ImGui::Dummy(ImVec2(0.0f, 15.0f));
+    ImGui::Button("Solve");
+    
     // ===== Print CSV
 
 #ifdef _DEBUG
@@ -159,20 +166,18 @@ void Rendering::MainWindow::render()
         {
             std::cout << "\n\n == Control " << (d + 1) << " =============================\n" << std::setw(6) << "x, " << std::setw(4) << "y\n";
             for (auto i = 0; i < control[d].size(); i++)
-                std::cout << std::setw(6) << (3.0/steps) * i << ", " << std::setw(4) << std::round(control[d][i] * 10000) / 10000 << std::endl;
+                std::cout << std::setw(6) << (3.0 / steps) * i << ", " << std::setw(4) << std::round(control[d][i] * 10000) / 10000 << std::endl;
 
             std::cout << "\n\n == State " << (d + 1) << " =============================\n" << std::setw(6) << "x, " << std::setw(4) << "y\n";
             for (auto i = 0; i < state[d].size(); i++)
-                std::cout << std::setw(6) << (3.0/steps) * i << ", " << std::setw(4) << std::round(state[d][i] * 10000) / 10000 << std::endl;
+                std::cout << std::setw(6) << (3.0 / steps) * i << ", " << std::setw(4) << std::round(state[d][i] * 10000) / 10000 << std::endl;
         }
     }
 #endif // _DEBUG
 
     // ===== End GUI
 
-    ImGui::Dummy(ImVec2(0.0f, 15.0f));
-    ImGui::Button("Solve");
-
+    ImGui::PopStyleColor();
     ImGui::PopStyleColor();
     ImGui::EndGroup();
 
@@ -196,9 +201,11 @@ void Rendering::MainWindow::render()
         {
             ImPlot::PushStyleColor(ImPlotCol_Line, Color::DYNAMIC);
             ImPlot::PushStyleColor(ImPlotCol_Line, Color::CONTROL);
+            ImPlot::PushStyleColor(ImPlotCol_FrameBg, Color::FOREGROUND);
             ImPlot::PlotLine("x(t)", &time[0], &x[0], time.size());
             ImPlot::PopStyleColor();
             ImPlot::PlotLine("y(t)", &time[0], &y[0], time.size());
+            ImPlot::PopStyleColor();
             ImPlot::PopStyleColor();
             ImPlot::EndPlot();
         }
