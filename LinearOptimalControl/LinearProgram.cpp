@@ -132,5 +132,3 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, RungeKutta::B
     std::vector<double> zero(steps, 0);
     return { MultiVector(dim, zero), MultiVector(dim, zero) };
 };
-
-
