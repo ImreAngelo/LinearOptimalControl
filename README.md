@@ -8,7 +8,7 @@ Currently, the solver is coupled to a graphical interace. In the future I want t
 The graphical interface is simple to use, since it only contains a few examples and no general solving capability.
 
 ## Dependencies
-- CPLEX (Concert Technology C++ API)
+- [CPLEX (Concert Technology C++ API)](https://www.ibm.com/products/ilog-cplex-optimization-studio/cplex-optimizer)
 - Dear ImGui
 - ImPlot
 - GLFW
