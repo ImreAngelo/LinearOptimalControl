@@ -1,8 +1,9 @@
 #pragma once
 
-#ifdef _DEBUG
+#ifndef TIMING
 #define TIME_FUNCTION() {}
-#define TIMER_START() {}
+#define TIME_SCOPE(name) {}
+#define TIMER_START(name) {}
 #define TIMER_STOP() {}
 #else
 #include <chrono>

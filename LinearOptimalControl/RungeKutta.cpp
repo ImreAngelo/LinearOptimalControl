@@ -39,6 +39,7 @@ void RungeKutta::parameterize(IloModel& model, const IloMatrix y, const IloMatri
 
             for (auto j = 0; j < dims; j++)
             {
+                // NOTE: 
                 IloNumExpr expr = k(0, j) * table.a[i][0];
 
                 for (auto ii = 1; ii < table.order; ii++)
@@ -47,7 +48,7 @@ void RungeKutta::parameterize(IloModel& model, const IloMatrix y, const IloMatri
                 sum(j) = expr;
             }
 
-            // Build function
+            // Build k_i
             const double ct = t + table.c[i] * dt;
 
             Eigen::MatrixXd fy = MatrixUtil::eval(Fy, ct);

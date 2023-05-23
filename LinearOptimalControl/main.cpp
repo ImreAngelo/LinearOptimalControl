@@ -3,16 +3,18 @@
 #ifdef _WIN32
 #include <Windows.h>
 
+// Show window in debug and timing mode
 void initSystem(bool release = false)
 {
-#ifdef _DEBUG
+#if defined(_DEBUG) || defined(TIMING)
     ShowWindow(GetConsoleWindow(), SW_SHOW);
 #else
-    //ShowWindow(GetConsoleWindow(), SW_HIDE);
-#endif // _DEBUG
+    ShowWindow(GetConsoleWindow(), SW_HIDE);
+#endif // _DEBUG || TIMING
 }
 
 #elif
+// If not on windows
 void initSystem(bool release = false);
 #endif // _WIN32
 
