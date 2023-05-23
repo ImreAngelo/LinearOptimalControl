@@ -2,6 +2,7 @@
 #include <vector>
 #include <ilcplex/ilocplex.h>
 #include <Eigen/Core>
+#include "RungeKutta.h"
 
 namespace Linear
 {
@@ -14,7 +15,7 @@ namespace Linear
 		const MultiVector objective;
 	};
 
-	Solution solve_t(double t0, double t1, Func Fc, MatrixT Fy, MatrixT Fu, size_t steps, const Eigen::MatrixXd yPhi, double p = 0);
+	Solution solve_t(double t0, double t1, RungeKutta::ButcherTable butcherTable, Func Fc, MatrixT Fy, MatrixT Fu, size_t steps, const Eigen::MatrixXd yPhi, double p = 0);
 	
 	Solution solve(double t0, double t1, size_t steps, Func Fc, MatrixT Fy, MatrixT Fu, Func Bc, MatrixT By, MatrixT Bu)
 	{

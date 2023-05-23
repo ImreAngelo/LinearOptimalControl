@@ -4,60 +4,49 @@
 #include "Color.h"
 #include <imgui.h>
 
-constexpr int steps = 200;
-
 void Rendering::MainWindow::render()
 {
-    ImGui::Begin("Main Window");
+    ImGui::Begin("Menu");
 
     ImGui::BeginGroup();
-    ImGui::PushStyleColor(ImGuiCol_Button, Color::BACKGROUND);
+    ImGui::PushStyleColor(ImGuiCol_FrameBg, Color::FOREGROUND);
+    ImGui::PushStyleColor(ImGuiCol_Button, Color::FOREGROUND);
+    ImGui::PushStyleColor(ImGuiCol_WindowBg, Color::BACKGROUND);
+    ImGui::PushStyleColor(ImGuiCol_Header, Color::FOREGROUND);
+
+    ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(5.0f, 5.0f));
+
+    // ===== Example Problems
+
+    ImGui::Dummy(ImVec2(0.0f, 0.0f));
+    ImGui::Text("Examples");
+    ImGui::Dummy(ImVec2(0.0f, 2.0f));
 
     if (ImGui::Button("Problem 1")) {
+        t0 = 0;
+        t1 = 2;
+
         const auto ph = Eigen::MatrixXd::Constant(1, 1, 1.0);
         const auto F0 = Eigen::Matrix<std::function<double(double)>, 1, 1>::Constant([](double t) { return  0.0; });
         const auto Fu = Eigen::Matrix<std::function<double(double)>, 1, 1>::Constant([](double t) { return -1.0; });
 
-        const auto [ control, state ] = Linear::solve_t(0, 2, F0(0,0), F0, Fu, steps, ph);
-
-        frame = PlotFrame("Example", 0, 2, control[0], state[0]);
-        show = true;
-
-#ifdef _DEBUG
-        // print csv for paper 
-        std::cout << "\nControl:\n" << "x, y" << std::endl;
-        for (auto i = 0; i < control[0].size(); i++)
-            std::cout << (2.0/steps) * i << ", " << std::round(control[0][i] * 10000) / 10000 << std::endl;
-
-        std::cout << "\nObjective:\n" << "x, y" << std::endl;
-        for (auto i = 0; i < state[0].size(); i++)
-            std::cout << (2.0/steps) * i << ", " << std::round(state[0][i] * 10000) / 10000 << std::endl;
-#endif // _DEBUG
+        const auto [ ut, yt ] = Linear::solve_t(t0, t1, RungeKutta::getTable(method), F0(0,0), F0, Fu, steps, ph);
+        control = ut; state = yt; show = true;
     }
 
     ImGui::SameLine();
 
     if (ImGui::Button("Problem 2")) {
+        t0 = 0;
+        t1 = 3;
+
         const auto ph = Eigen::MatrixXd::Constant(1, 1, 1.0);
         const auto Fy = Eigen::Matrix<std::function<double(double)>, 1, 1>::Constant([](double t) { return .7; });
         const auto Fu = Eigen::Matrix<std::function<double(double)>, 1, 1>::Constant([](double t) { return -1; });
         const auto Fc = [](double t) { return .1*t; };
 
-        const auto [ control, state ] = Linear::solve_t(0, 3, Fc, Fy, Fu, steps, ph);
-
-        frame = PlotFrame("Example", 0, 3, control[0], state[0]);
-        show = true;
-
-#ifdef _DEBUG
-        // print csv for paper 
-        std::cout << "\nControl:\n" << "x, y" << std::endl;
-        for (auto i = 0; i < control[0].size(); i++)
-            std::cout << (3.0/steps) *i << ", " << std::round(control[0][i] * 10000) / 10000 << std::endl;
-
-        std::cout << "\nObjective:\n" << "x, y" << std::endl;
-        for (auto i = 0; i < state[0].size(); i++)
-            std::cout << (3.0/steps) * i << ", " << std::round(state[0][i] * 10000)/10000 << std::endl;
-#endif // _DEBUG
+        const auto [ut, yt] = Linear::solve_t(t0, t1, RungeKutta::getTable(method), Fc, Fy, Fu, steps, ph);
+        control = ut; state = yt; show = true;
     }
 
     ImGui::SameLine();
@@ -77,32 +66,18 @@ void Rendering::MainWindow::render()
         const double t0 = 0;
         const double t1 = 1.0;
 
-        auto [control, state] = Linear::solve_t(t0, t1, Fc, Fy, Fu, 200, phi, 1);
+        auto [ ut, yt ] = Linear::solve_t(t0, t1, RungeKutta::getTable(method), Fc, Fy, Fu, steps, phi, 1);
+        control = ut; state = yt; show = true;
 
-        frame = PlotFrame("Example", t0, t1, control[1], state[1]);
-        show = true;
+        x = ut[1];
+        y = yt[1];
 
-        //#ifdef _DEBUG
-        //        // print csv for paper 
-        //        std::cout << "\nControl:\n" << "x, y" << std::endl;
-        //        for (auto i = 0; i < solution.control[0].size(); i++)
-        //            std::cout << (3.0/steps) *i << ", " << std::round(solution.control[0][i] * 10000) / 10000 << std::endl;
-        //
-        //        std::cout << "\nObjective:\n" << "x, y" << std::endl;
-        //        for (auto i = 0; i < solution.objective[0].size(); i++)
-        //            std::cout << (3.0/steps) * i << ", " << std::round(solution.objective[0][i] * 10000)/10000 << std::endl;
-        //#endif // _DEBUG
-
-        x = control[0];
-        y = state[0];
         time = std::vector<double>(x.size(), 0.0);
-
         for (auto i = 0; i < x.size(); i++)
             time[i] = ((t1 - t0) / steps) * i;
     }
 
-    RungeKutta::ButcherTable butcherTable = (RungeKutta::debug == 0) ? RungeKutta::euler :
-                                            (RungeKutta::debug == 1) ? RungeKutta::heun : RungeKutta::rk4;
+    // ===== Timing Tests (Standard RK)
 
     if (ImGui::Button("Timing Test #1"))
     {
@@ -112,7 +87,7 @@ void Rendering::MainWindow::render()
         F0 << [](double t) { return 0.1*t; };
         Fy << [](double t) { return -1.0; };
 
-        auto [r, t] = RungeKutta::solve(y0, F0, Fy, F0, steps, 5.0, 0.0, butcherTable);
+        auto [r, t] = RungeKutta::solve(y0, F0, Fy, F0, steps, 5.0, 0.0, RungeKutta::getTable(method));
 
         x = std::vector<double>(steps, 0.0);
         y = std::vector<double>(steps, 0.0);
@@ -141,7 +116,7 @@ void Rendering::MainWindow::render()
         Fy << [](double t) { return a; }, [](double t) { return -b; },
               [](double t) { return c; }, [](double t) { return -d; };
 
-        auto [ r, t ] = RungeKutta::solve(y0, F0, Fy, F0, steps, 5.0, 0.0, butcherTable);
+        auto [ r, t ] = RungeKutta::solve(y0, F0, Fy, F0, steps, 5.0, 0.0, RungeKutta::getTable(method));
 
         x = std::vector<double>(steps, 0.0);
         y = std::vector<double>(steps, 0.0);
@@ -155,21 +130,74 @@ void Rendering::MainWindow::render()
         time = t;
     }
 
-    // DEBUGGING
-    if (ImGui::Button("Eulers Method")) { RungeKutta::debug = 0; }
-    ImGui::SameLine();
-    if (ImGui::Button("Heun's Method")) { RungeKutta::debug = 1; }
-    ImGui::SameLine();
-    if (ImGui::Button("Classic RK4")) { RungeKutta::debug = 2; }
+    // ===== Runge-Kutta Method
 
+    const char* items[] = { "Euler's", "Implicit Euler", "Heun's 2nd Order", "Classic RK4" };
+
+    ImGui::Dummy(ImVec2(0.0f, 10.0f));
+    ImGui::Text("Runge-Kutta Options");
+    ImGui::Dummy(ImVec2(0.0f, 2.0f));
+
+    if (ImGui::BeginCombo("Method", items[method]))
+    {
+        for (int n = 0; n < IM_ARRAYSIZE(items); n++)
+        {
+            bool is_selected = (items[method] == items[n]);
+            if (ImGui::Selectable(items[n], is_selected))
+                method = n;
+            if (is_selected)
+                ImGui::SetItemDefaultFocus();
+        }
+        ImGui::EndCombo();
+    }
+
+    ImGui::InputInt("Steps", &steps, 1, 25);
+    steps = std::min(std::max(steps, 2), 500);
+
+    // ===== TODO: Calculate on button press
+
+    ImGui::Dummy(ImVec2(0.0f, 15.0f));
+    ImGui::Button("Solve");
+    
+    // ===== Print CSV
+
+#ifdef _DEBUG
+    // Print CSV for thesis graphs
+    if (ImGui::Button("Print CSV to console"))
+    {
+        for (auto d = 0; d < control.size(); d++)
+        {
+            std::cout << "\n\n == Control " << (d + 1) << " =============================\n" << std::setw(6) << "x, " << std::setw(4) << "y\n";
+            for (auto i = 0; i < control[d].size(); i++)
+                std::cout << std::setw(6) << (3.0 / steps) * i << ", " << std::setw(4) << std::round(control[d][i] * 10000) / 10000 << std::endl;
+
+            std::cout << "\n\n == State " << (d + 1) << " =============================\n" << std::setw(6) << "x, " << std::setw(4) << "y\n";
+            for (auto i = 0; i < state[d].size(); i++)
+                std::cout << std::setw(6) << (3.0 / steps) * i << ", " << std::setw(4) << std::round(state[d][i] * 10000) / 10000 << std::endl;
+        }
+    }
+#endif // _DEBUG
+
+    // ===== End GUI
+
+    ImGui::PopStyleVar();
+    ImGui::PopStyleColor();
+    ImGui::PopStyleColor();
+    ImGui::PopStyleColor();
     ImGui::PopStyleColor();
     ImGui::EndGroup();
 
     ImGui::End();
 
+    // ===== Render Plots
+
     if (show) {
+        frame = PlotFrame("Example", t0, t1, control[0], state[0]);
+        show = false;
+    }
+
+    if (control.size() > 0)
         frame.render();
-    } 
 
     if (time.size() > 0)
     {
@@ -177,11 +205,13 @@ void Rendering::MainWindow::render()
 
         if (ImPlot::BeginPlot("Runge-Kutta 2D"))
         {
+            ImPlot::PushStyleColor(ImPlotCol_FrameBg, Color::BACKGROUND);
             ImPlot::PushStyleColor(ImPlotCol_Line, Color::DYNAMIC);
             ImPlot::PushStyleColor(ImPlotCol_Line, Color::CONTROL);
             ImPlot::PlotLine("x(t)", &time[0], &x[0], time.size());
             ImPlot::PopStyleColor();
             ImPlot::PlotLine("y(t)", &time[0], &y[0], time.size());
+            ImPlot::PopStyleColor();
             ImPlot::PopStyleColor();
             ImPlot::EndPlot();
         }

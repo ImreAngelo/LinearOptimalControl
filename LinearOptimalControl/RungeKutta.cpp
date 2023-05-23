@@ -18,16 +18,19 @@ void RungeKutta::parameterize(IloModel& model, const IloMatrix y, const IloMatri
         const double t = n * dt + t0;
 
         // Each row is a order, and each column is a dimension
-        Matrix<IloNumVar> k(table.order, dims);
+        IloNumVar z(env, -FLT_MAX, FLT_MAX, ILOFLOAT);
+        IloNumExpr zero = z - z;
+
+        Matrix<IloNumExpr> k(table.order, dims);
         for (auto i = 0; i < table.order; i++)
             for(auto j = 0; j < dims; j++)
-                k(i,j) = IloNumVar(env, -FLT_MAX, FLT_MAX, ILOFLOAT);
+                k(i,j) = zero;
 
         // ===== Intermediary step
         // *** TODO: 
-        //  - Use matrix operations instead of vectors
+        //  - Use matrix operations instead of std::vectors
         //  - I.e. sum = [a.row(i) * k(i)].sum()
-        //  - Rename variables to fit (dims = s)
+        //  - Rename variables (dims = s etc.)
 
         for (auto i = 0; i < table.order; i++)
         {
@@ -54,9 +57,10 @@ void RungeKutta::parameterize(IloModel& model, const IloMatrix y, const IloMatri
             auto _s = MatrixUtil::mul(fy, sum);
             auto _y = MatrixUtil::mul(fy, (IloMatrix)(y.col(n)));
             auto _u = MatrixUtil::mul(fu, (IloMatrix)(u.col(n)));
+            //auto _v = MatrixUtil::mul(fu, sum);
 
             for (auto j = 0; j < dims; j++)
-                model.add(k(i, j) == dt * (_c + _y(j, 0) + _s(j) + _u(j, 0)));
+                k(i, j) = dt * (_c + _y(j, 0) + _s(j) + _u(j, 0));
         }
 
         // ===== y_{n+1}

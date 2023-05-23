@@ -1,7 +1,6 @@
 #include "LinearProgram.h"
 #include "Matrix.h"
 #include "Timer.h"
-#include "RungeKutta.h"
 
 template<typename T>
 using Matrix = MatrixUtil::Matrix<T>;
@@ -32,7 +31,7 @@ inline IloNumExprArg integrate(const IloEnv& env, const Matrix<IloNumVar>& y, co
     return obj;
 }
 
-Linear::Solution Linear::solve_t(const double t0, const double t1, Func Fc, MatrixT Fy, MatrixT Fu, size_t steps, const Eigen::MatrixXd yPhi, double p)
+Linear::Solution Linear::solve_t(const double t0, const double t1, RungeKutta::ButcherTable butcherTable, Func Fc, MatrixT Fy, MatrixT Fu, size_t steps, const Eigen::MatrixXd yPhi, double p)
 {
     TIME_FUNCTION();
 
@@ -46,7 +45,7 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, Func Fc, Matr
     Matrix<IloNumVar> u(dim, steps);
     Matrix<IloNumVar> y(dim, steps);
 
-    // Cheat for example 3 //
+    // Cheat for example 3 - TODO: Take lb & ub as parameters
     constexpr float max[2] = { FLT_MAX, 0.0f };
     constexpr float min[2] = { 0.0f,-FLT_MAX };
 
@@ -63,17 +62,12 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, Func Fc, Matr
         constexpr double a = 5.0;
         constexpr float k1 = 2.0f, k2 = 8.0f;
 
-        std::cout << "\nExample 3 specifics\n\n";
         for (auto n = 0; n < steps; n++)
         {
             model.add(0 == u(0, n) + a * u(1, n));
             model.add(y(1, n) - u(0, n) / k1 + u(1, n) / k2 >= 0);
         }
     }
-
-    // For timing
-    RungeKutta::ButcherTable butcherTable = (RungeKutta::debug == 0) ? RungeKutta::euler : 
-                                            (RungeKutta::debug == 1) ? RungeKutta::heun : RungeKutta::rk4;
 
     // Complete Parameterization
     RungeKutta::parameterize(model, y, u, Fc, Fy, Fu, dt, t0, butcherTable);
@@ -85,7 +79,7 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, Func Fc, Matr
     TIMER_START("Set boundary");
 
     // Add boundary conditions
-    // TODO: Boundary matrices
+    // TODO: Boundary matrices as function parameters
     for(auto i = 0; i < dim; i++)
         model.add(y(i, 0) == 1);
 
@@ -94,6 +88,13 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, Func Fc, Matr
         TIMER_START("CPLEX");
 
         IloCplex cplex(model);
+
+#ifdef _DEBUG
+        std::cout << "\n[CPLEX] ";
+#else
+        cplex.setOut(env.getNullStream());
+#endif // _DEBUG
+
         cplex.solve();
 
         TIMER_STOP();
@@ -121,15 +122,15 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, Func Fc, Matr
         return { control, objective };
     }
     catch (IloException& e) {
-        std::cerr << "Concert exception caught: " << e << std::endl;
-        throw "Concert Technology exception";
+        std::cerr << "\n[Error] Concert exception caught: " << e;
     }
     catch (...) {
-        std::cerr << "An unknown error occured.";
+        std::cerr << "\n[Error] An unknown error occured.";
     }
 
-    throw "failed";
-    return {};
+    std::cerr << "\n[Error] Could not solve, returning 0\n\n";
+    std::vector<double> zero(steps, 0);
+    return { MultiVector(dim, zero), MultiVector(dim, zero) };
 };
 
 
