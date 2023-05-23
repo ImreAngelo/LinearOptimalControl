@@ -9,10 +9,10 @@ The graphical interface is simple to use, since it only contains a few examples 
 
 ## Dependencies
 - [CPLEX (Concert Technology C++ API)](https://www.ibm.com/products/ilog-cplex-optimization-studio/cplex-optimizer)
-- Dear ImGui
-- ImPlot
-- GLFW
-- Eigen3
+- [Dear ImGui](https://github.com/ocornut/imgui)
+- [ImPlot](https://github.com/epezent/implot)
+- [GLFW](https://www.glfw.org/)
+- [Eigen3](https://eigen.tuxfamily.org/index.php?title=Main_Page)
 
 
 ## Build Instructions
