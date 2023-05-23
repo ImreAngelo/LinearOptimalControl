@@ -224,6 +224,7 @@
     <None Include="..\Dependencies\eigen\Eigen\SVD" />
     <None Include="..\Dependencies\eigen\Eigen\ThreadPool" />
     <None Include="..\Dependencies\eigen\Eigen\UmfPackSupport" />
+    <None Include="..\README.md" />
     <None Include="imgui.ini" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
