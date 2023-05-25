@@ -8,7 +8,7 @@ using Matrix = MatrixUtil::Matrix<T>;
 /// <summary>
 /// Integrate exp(-p * t) using trapezoidal rule
 /// </summary>
-inline IloNumExprArg integrate(const IloEnv& env, const Matrix<IloNumVar>& y, const Eigen::MatrixXd yPhi, const double dt, const size_t steps, const double t0, const double p)
+inline IloNumExprArg integrate(const IloEnv& env, const Matrix<IloNumVar>& u, const Matrix<IloNumVar>& y, const Eigen::MatrixXd yPhi, const double dt, const size_t steps, const double t0, const double p)
 {
     TIMER_START("Integration");
     
@@ -22,8 +22,8 @@ inline IloNumExprArg integrate(const IloEnv& env, const Matrix<IloNumVar>& y, co
 
         for (auto j = 0; j < y.rows(); j++)
             obj = obj + ((b - a) / 2.0) * (
-                std::exp(-p * a) * (yPhi(0, j) * y(j, i)) + 
-                std::exp(-p * b) * (yPhi(0, j) * y(j, i + 1))
+                /*std::exp(-p * a) * */(yPhi(0, j) * y(j, i) * y(j, i)              + u(j, i) * u(j, i)) +
+                /*std::exp(-p * b) * */(yPhi(0, j) * y(j, i + 1) * y(j, i + 1)      + u(j, i + 1) * u(j, i + 1))
             );
     }
 
@@ -45,27 +45,10 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, RungeKutta::B
     Matrix<IloNumVar> u(dim, steps);
     Matrix<IloNumVar> y(dim, steps);
 
-    // Cheat for example 3 - TODO: Take lb & ub as parameters
-    constexpr float max[2] = { FLT_MAX, 0.0f };
-    constexpr float min[2] = { 0.0f,-FLT_MAX };
-
     for (auto j = 0; j < steps; j++) {   // Col
         for (auto i = 0; i < dim; i++) { // Row
-            u(i, j) = (dim == 2) ? IloNumVar(env, min[i], max[i], IloNumVar::Float) : IloNumVar(env, 0, 1);
-            y(i, j) = IloNumVar(env, 0, FLT_MAX);
-        }
-    }
-
-    // Debug example 3 - TODO: Build algebraic constraints from function parameters, see solve()
-    if (dim == 2)
-    {
-        constexpr double a = 5.0;
-        constexpr float k1 = 2.0f, k2 = 8.0f;
-
-        for (auto n = 0; n < steps; n++)
-        {
-            model.add(0 == u(0, n) + a * u(1, n));
-            model.add(y(1, n) - u(0, n) / k1 + u(1, n) / k2 >= 0);
+            u(i, j) = IloNumVar(env, -FLT_MAX, FLT_MAX);
+            y(i, j) = IloNumVar(env, -FLT_MAX, FLT_MAX);
         }
     }
 
@@ -73,7 +56,7 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, RungeKutta::B
     RungeKutta::parameterize(model, y, u, Fc, Fy, Fu, dt, t0, butcherTable);
 
     // Build objective function
-    const IloNumExprArg obj = integrate(env, y, yPhi, dt, steps, t0, p);
+    const IloNumExprArg obj = integrate(env, u, y, yPhi, dt, steps, t0, p);
     model.add(IloMinimize(env, obj));
 
     TIMER_START("Set boundary");

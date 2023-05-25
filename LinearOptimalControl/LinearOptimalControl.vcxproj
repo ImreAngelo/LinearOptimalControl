@@ -209,7 +209,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>TIMING;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\imgui;$(SolutionDir)Dependencies\implot;$(SolutionDir)Dependencies\glfw\include;$(SolutionDir)\Dependencies\eigen;$(SolutionDir)\Dependencies\cplex\include;$(SolutionDir)\Dependencies\concert\include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\imgui;$(SolutionDir)Dependencies\implot;$(SolutionDir)Dependencies\glfw\include;$(SolutionDir)\Dependencies\eigen;$(CPLEX_STUDIO_DIR2211)\cplex\include;$(CPLEX_STUDIO_DIR2211)\concert\include;</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -217,14 +217,15 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\glfw\lib-vc2022;$(SolutionDir)Dependencies\cplex\lib\x64_windows_msvc14\stat_mda;$(SolutionDir)Dependencies\concert\lib\x64_windows_msvc14\stat_mda;</AdditionalLibraryDirectories>
-      <AdditionalDependencies>cplex2211.lib;ilocplex.lib;concert.lib;opengl32.lib;glfw3.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(CPLEX_STUDIO_DIR2211)\cplex\lib\x64_windows_msvc14\stat_mda;$(CPLEX_STUDIO_DIR2211)\concert\lib\x64_windows_msvc14\stat_mda;$(SolutionDir)Dependencies\glfw\lib-vc2022;</AdditionalLibraryDirectories>
+      <AdditionalDependencies>concert.lib;cplex2211.lib;ilocplex.lib;opengl32.lib;glfw3.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
       <EntryPointSymbol>
       </EntryPointSymbol>
       <AdditionalOptions>/FORCE:MULTIPLE %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>
-      <Command>copy /Y "$(SolutionDir)Dependencies\cplex\bin\x64_win64\cplex2211.dll" "$(TargetDir)"</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -256,6 +257,7 @@
     <ClInclude Include="..\Dependencies\implot\implot.h" />
     <ClInclude Include="..\Dependencies\implot\implot_internal.h" />
     <ClInclude Include="Color.h" />
+    <ClInclude Include="ExampleProblems.h" />
     <ClInclude Include="LinearProgram.h" />
     <ClInclude Include="MainWindow.h" />
     <ClInclude Include="Matrix.h" />

@@ -3,6 +3,7 @@
 #include "RungeKutta.h"
 #include "Color.h"
 #include <imgui.h>
+#include "ExampleProblems.h"
 
 void Rendering::MainWindow::render()
 {
@@ -21,6 +22,52 @@ void Rendering::MainWindow::render()
     ImGui::Dummy(ImVec2(0.0f, 0.0f));
     ImGui::Text("Examples");
     ImGui::Dummy(ImVec2(0.0f, 2.0f));
+
+    if (ImGui::Button("Hager Problem"))
+    {
+        //const size_t n = 10;
+
+        Eigen::Matrix<std::function<double(double)>, 1, 1> F0, Fy, Fu;
+        auto y0 = Eigen::Matrix2d::Constant(1, 1, 1.0);
+
+        F0 << [](double t) { return 0.0; };
+        Fy << [](double t) { return 0.5; };
+        Fu << [](double t) { return 1.0; };
+
+        const auto [u,v] = Linear::solve_t(0, 1, RungeKutta::getTable(method), F0(0,0), Fy, Fu, steps + 1, Eigen::MatrixXd::Constant(1, 1, 2.0), 0);
+        const auto [r,s] = Example::getSolution(steps);
+        
+        control = u; state = v; show = true;
+        x = r; y = s; 
+        
+        double maxErrorX = 0, maxErrorY = 0;
+
+        //x = std::vector<double>(steps - 1, 0.0);
+        //y = std::vector<double>(steps - 1, 0.0);
+
+        time = std::vector<double>(steps, 0.0);
+        for (auto i = 0; i < steps; i++)
+        {
+            time[i] = (1.0 / steps) * i;
+
+            if (i > 1)
+            {
+                maxErrorX = std::max(maxErrorX, u[0][i] - r[i]);
+                maxErrorY = std::max(maxErrorY, v[0][i] - s[i]);
+            }
+            /*x[i] = u[0][i] - r[i];
+            y[i] = v[0][i] - s[i];*/
+        }
+
+        assert(v.size() = s.size());
+        assert(u.size() = r.size());
+
+        std::cout << "\nMax error: " << maxErrorX << " and " << maxErrorY << "\n\n";
+
+        std::cout << "y: " << v[0][0] << "/" << s[0] << " -> " << v[0][v.size() - 1] << "/" << s[s.size() - 1] << "\n";
+        std::cout << "u: " << u[0][0] << "/" << r[0] << " -> " << u[0][u.size() - 1] << "/" << r[r.size() - 1] << "\n";
+    }
+
 
     if (ImGui::Button("Problem 1")) {
         t0 = 0;
@@ -151,8 +198,8 @@ void Rendering::MainWindow::render()
         ImGui::EndCombo();
     }
 
-    ImGui::InputInt("Steps", &steps, 1, 25);
-    steps = std::min(std::max(steps, 2), 500);
+    ImGui::InputInt("Steps", &steps, 1, 20);
+    steps = std::min(std::max(steps, 3), 500);
 
     // ===== TODO: Calculate on button press
 

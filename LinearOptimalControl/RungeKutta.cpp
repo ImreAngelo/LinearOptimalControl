@@ -5,44 +5,42 @@ template<typename T>
 using Matrix = MatrixUtil::Matrix<T>;
 
 // TODO: Keep as implicit version!
-void RungeKutta::parameterize(IloModel& model, const IloMatrix y, const IloMatrix u, const func& Fc, const FMatrix& Fy, const FMatrix& Fu, double dt, double t0, ButcherTable table)
+void RungeKutta::parameterize(IloModel& model, const IloMatrix& y, const IloMatrix& u, const func& Fc, const FMatrix& Fy, const FMatrix& Fu, double dt, double t0, ButcherTable table)
 {
     TIME_SCOPE("Runge Kutta (parameterization)");
 
-    const size_t dims = y.rows();
+    const size_t m = y.rows();
     const size_t steps = y.cols();
     const IloEnv env = model.getEnv();
+
+    // For constrion of IloNumExpr objects
+    const IloNumVar z(env, -FLT_MAX, FLT_MAX, ILOFLOAT);
+    const IloNumExpr zero = z - z;
 
     for (auto n = 0; n < steps - 1; n++)
     {
         const double t = n * dt + t0;
 
         // Each row is a order, and each column is a dimension
-        IloNumVar z(env, -FLT_MAX, FLT_MAX, ILOFLOAT);
-        IloNumExpr zero = z - z;
-
-        Matrix<IloNumExpr> k(table.order, dims);
-        for (auto i = 0; i < table.order; i++)
-            for(auto j = 0; j < dims; j++)
-                k(i,j) = zero;
+        Matrix<IloNumExpr> k = Matrix<IloNumExpr>::Constant(table.order, m, zero);
 
         // ===== Intermediary step
         // *** TODO: 
         //  - Use matrix operations instead of std::vectors
-        //  - I.e. sum = [a.row(i) * k(i)].sum()
-        //  - Rename variables (dims = s etc.)
+        //  - I.e. sum = a.row(i) * k(i)
 
         for (auto i = 0; i < table.order; i++)
         {
             // Sum of a_{i,j} * k_j
-            Matrix<IloNumExpr> sum(dims, 1);
+            Matrix<IloNumExpr> sum(m, 1);
 
-            for (auto j = 0; j < dims; j++)
+            for (auto j = 0; j < m; j++)
             {
-                // NOTE: 
-                IloNumExpr expr = k(0, j) * table.a[i][0];
+                // NOTE: This is more efficient that use the zero trick
+                //IloNumExpr expr = k(0, j) * table.a[i][0];
+                IloNumExpr expr = zero;
 
-                for (auto ii = 1; ii < table.order; ii++)
+                for (auto ii = 0; ii < table.order; ii++)
                     expr = expr + k(ii, j) * table.a[i][ii];
                 
                 sum(j) = expr;
@@ -60,20 +58,20 @@ void RungeKutta::parameterize(IloModel& model, const IloMatrix y, const IloMatri
             auto _u = MatrixUtil::mul(fu, (IloMatrix)(u.col(n)));
             //auto _v = MatrixUtil::mul(fu, sum);
 
-            for (auto j = 0; j < dims; j++)
+            for (auto j = 0; j < m; j++)
                 k(i, j) = dt * (_c + _y(j, 0) + _s(j) + _u(j, 0));
         }
 
         // ===== y_{n+1}
 
-        for (auto d = 0; d < dims; d++)
+        for (auto j = 0; j < m; j++)
         {
-            IloNumExpr biki = k(0, d) * table.b[0];
+            IloNumExpr biki = zero;
 
-            for (auto i = 1; i < table.order; i++)
-                biki = biki + k(i, d) * table.b[i];
+            for (auto i = 0; i < table.order; i++)
+                biki = biki + k(i, j) * table.b[i];
 
-            model.add(y(d, n + 1) == y(d, n) + biki);
+            model.add(y(j, n + 1) == y(j, n) + biki);
         }
     }
 }
@@ -82,7 +80,7 @@ RungeKutta::ret RungeKutta::solve(const Eigen::MatrixXd& y0, const FMatrix& Fc, 
 {
     TIME_SCOPE("Runge-Kutta (literal types)");
 
-    const size_t dims = Fy.rows();
+    const size_t s = Fy.rows();
     const double dt = (t1 - t0)/steps;
 
     std::vector<Eigen::MatrixXd> y = { y0 };
@@ -100,7 +98,7 @@ RungeKutta::ret RungeKutta::solve(const Eigen::MatrixXd& y0, const FMatrix& Fc, 
 
         for (auto i = 0; i < table.order; i++)
         {
-            Eigen::MatrixXd sum = Eigen::MatrixXd::Constant(dims, dims, 0.0);
+            Eigen::MatrixXd sum = Eigen::MatrixXd::Constant(s, s, 0.0);
 
             for (auto j = 0; j < i; j++)
             {

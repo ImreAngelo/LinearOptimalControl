@@ -26,7 +26,7 @@ namespace RungeKutta
         }
     };
 
-    static const ButcherTable backward_euler{ {1},{{1}},{1} };
+    static const ButcherTable backward_euler{ {0,0.5},{{0,0},{0.5,0}},{0.5,0.5} };
     static const ButcherTable euler{ {0},{{0}},{1} };
     static const ButcherTable heun{ {0, 1}, { {0,0},{1,0} }, { 1.0 / 2.0, 1.0 / 2.0 } };
     static const ButcherTable rk4{ {0,.5,.5,1}, {{ 0, 0, 0, 0 },{ .5, 0, 0, 0 },{ 0, .5, 0, 0 },{ 0, 0, 1, 0},},{(1/6.0), (1/3.0), (1/3.0), (1/6.0)} };
@@ -42,7 +42,7 @@ namespace RungeKutta
 	/// <summary>
 	/// Complete parameterization using Runge-Kutta
 	/// </summary>
-	void parameterize(IloModel& model, const IloMatrix y, const IloMatrix u, const func& Fc, const FMatrix& Fy, const FMatrix& Fu, double dt, double t0 = 0, ButcherTable table = euler);
+	void parameterize(IloModel& model, const IloMatrix& y, const IloMatrix& u, const func& Fc, const FMatrix& Fy, const FMatrix& Fu, double dt, double t0 = 0, ButcherTable table = euler);
     
     ButcherTable getTable(int method)
     {
