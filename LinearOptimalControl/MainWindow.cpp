@@ -30,7 +30,7 @@ void Rendering::MainWindow::render()
         const auto F0 = Eigen::Matrix<std::function<double(double)>, 1, 1>::Constant([](double t) { return  0.0; });
         const auto Fu = Eigen::Matrix<std::function<double(double)>, 1, 1>::Constant([](double t) { return -1.0; });
 
-        const auto [ ut, yt ] = Linear::solve_t(t0, t1, RungeKutta::getTable(method), F0(0,0), F0, Fu, steps, ph);
+        const auto [ ut, yt ] = Linear::solve_t(t0, t1, RungeKutta::getTable(method), F0(0,0), F0, Fu, steps + 1, ph);
         control = ut; state = yt; show = true;
     }
 
@@ -45,7 +45,7 @@ void Rendering::MainWindow::render()
         const auto Fu = Eigen::Matrix<std::function<double(double)>, 1, 1>::Constant([](double t) { return -1; });
         const auto Fc = [](double t) { return .1*t; };
 
-        const auto [ut, yt] = Linear::solve_t(t0, t1, RungeKutta::getTable(method), Fc, Fy, Fu, steps, ph);
+        const auto [ut, yt] = Linear::solve_t(t0, t1, RungeKutta::getTable(method), Fc, Fy, Fu, steps + 1, ph);
         control = ut; state = yt; show = true;
     }
 
@@ -61,12 +61,12 @@ void Rendering::MainWindow::render()
         Fu << [](double t) { return -1.0; }, [](double t) { return 0.0; },
               [](double t) { return 0.0; }, [](double t) { return 1.0; };
 
-        phi << 0.0, 1.0;
+        phi << 0.0, -1.0;
 
         const double t0 = 0;
         const double t1 = 1.0;
 
-        auto [ ut, yt ] = Linear::solve_t(t0, t1, RungeKutta::getTable(method), Fc, Fy, Fu, steps, phi, 1);
+        auto [ ut, yt ] = Linear::solve_t(t0, t1, RungeKutta::getTable(method), Fc, Fy, Fu, steps + 1, phi, 1);
         control = ut; state = yt; show = true;
 
         x = ut[1];
@@ -169,11 +169,11 @@ void Rendering::MainWindow::render()
         {
             std::cout << "\n\n == Control " << (d + 1) << " =============================\n" << std::setw(6) << "x, " << std::setw(4) << "y\n";
             for (auto i = 0; i < control[d].size(); i++)
-                std::cout << std::setw(6) << (3.0 / steps) * i << ", " << std::setw(4) << std::round(control[d][i] * 10000) / 10000 << std::endl;
+                std::cout << std::setw(6) << (3.0 / (steps - 1)) * i << ", " << std::setw(4) << std::round(control[d][i] * 10000) / 10000 << std::endl;
 
             std::cout << "\n\n == State " << (d + 1) << " =============================\n" << std::setw(6) << "x, " << std::setw(4) << "y\n";
             for (auto i = 0; i < state[d].size(); i++)
-                std::cout << std::setw(6) << (3.0 / steps) * i << ", " << std::setw(4) << std::round(state[d][i] * 10000) / 10000 << std::endl;
+                std::cout << std::setw(6) << (3.0 / (steps - 1)) * i << ", " << std::setw(4) << std::round(state[d][i] * 10000) / 10000 << std::endl;
         }
     }
 #endif // _DEBUG
@@ -192,7 +192,7 @@ void Rendering::MainWindow::render()
     // ===== Render Plots
 
     if (show) {
-        frame = PlotFrame("Example", t0, t1, control[0], state[0]);
+        frame = PlotFrame("Window 1", t0, t1, control[0], state[0]);
         show = false;
     }
 
@@ -203,12 +203,12 @@ void Rendering::MainWindow::render()
     {
         ImGui::Begin("Result");
 
-        if (ImPlot::BeginPlot("Runge-Kutta 2D"))
+        if (ImPlot::BeginPlot("Window 2"))
         {
             ImPlot::PushStyleColor(ImPlotCol_FrameBg, Color::BACKGROUND);
             ImPlot::PushStyleColor(ImPlotCol_Line, Color::DYNAMIC);
             ImPlot::PushStyleColor(ImPlotCol_Line, Color::CONTROL);
-            ImPlot::PlotLine("x(t)", &time[0], &x[0], time.size());
+            ImPlot::PlotLine("u(t)", &time[0], &x[0], time.size());
             ImPlot::PopStyleColor();
             ImPlot::PlotLine("y(t)", &time[0], &y[0], time.size());
             ImPlot::PopStyleColor();

@@ -51,7 +51,7 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, RungeKutta::B
 
     for (auto j = 0; j < steps; j++) {   // Col
         for (auto i = 0; i < dim; i++) { // Row
-            u(i, j) = (dim == 2) ? IloNumVar(env, min[i], max[i], IloNumVar::Float) : IloNumVar(env, 0, 1);
+            u(i, j) = (dim == 2) ? IloNumVar(env, 0, 10, IloNumVar::Float) : IloNumVar(env, 0, 1);
             y(i, j) = IloNumVar(env, 0, FLT_MAX);
         }
     }
@@ -64,7 +64,7 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, RungeKutta::B
 
         for (auto n = 0; n < steps; n++)
         {
-            model.add(0 == u(0, n) + a * u(1, n));
+            model.add(0 == u(0, n) - a * u(1, n));
             model.add(y(1, n) - u(0, n) / k1 + u(1, n) / k2 >= 0);
         }
     }

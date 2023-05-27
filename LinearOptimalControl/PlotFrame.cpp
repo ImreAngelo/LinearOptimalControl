@@ -21,11 +21,11 @@ void Rendering::PlotFrame::render()
         ImPlot::SetNextLineStyle(Color::CONTROL, 1.5);
         ImPlot::PlotLine("u(t)", &linspace(t0, t1, control.size())[0], &control[0], control.size());
         ImPlot::PopStyleColor();
-        ImPlot::EndPlot();
-    }
+    //    ImPlot::EndPlot();
+    //}
 
-    if (ImPlot::BeginPlot("Objective"))
-    {
+    //if (ImPlot::BeginPlot("Objective"))
+    //{
         ImPlot::PushStyleColor(ImPlotCol_FrameBg, Color::FOREGROUND);
         ImPlot::SetNextLineStyle(Color::DYNAMIC, 1.5);
         ImPlot::PlotLine("y(t)", &linspace(t0, t1, dynamic.size())[0], &dynamic[0], dynamic.size());
