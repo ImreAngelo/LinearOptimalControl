@@ -28,7 +28,7 @@ void Rendering::MainWindow::render()
         //const size_t n = 10;
 
         Eigen::Matrix<std::function<double(double)>, 1, 1> F0, Fy, Fu;
-        auto y0 = Eigen::Matrix2d::Constant(1, 1, 1.0);
+       // auto y0 = Eigen::Matrix2d::Constant(1, 1, 1.0);
 
         F0 << [](double t) { return 0.0; };
         Fy << [](double t) { return 0.5; };
@@ -59,69 +59,13 @@ void Rendering::MainWindow::render()
             y[i] = v[0][i] - s[i];*/
         }
 
-        assert(v.size() = s.size());
-        assert(u.size() = r.size());
+        //assert(v.size() == s.size());
+        //assert(u.size() == r.size());
 
         std::cout << "\nMax error: " << maxErrorX << " and " << maxErrorY << "\n\n";
 
         std::cout << "y: " << v[0][0] << "/" << s[0] << " -> " << v[0][v.size() - 1] << "/" << s[s.size() - 1] << "\n";
         std::cout << "u: " << u[0][0] << "/" << r[0] << " -> " << u[0][u.size() - 1] << "/" << r[r.size() - 1] << "\n";
-    }
-
-
-    if (ImGui::Button("Problem 1")) {
-        t0 = 0;
-        t1 = 2;
-
-        const auto ph = Eigen::MatrixXd::Constant(1, 1, 1.0);
-        const auto F0 = Eigen::Matrix<std::function<double(double)>, 1, 1>::Constant([](double t) { return  0.0; });
-        const auto Fu = Eigen::Matrix<std::function<double(double)>, 1, 1>::Constant([](double t) { return -1.0; });
-
-        const auto [ ut, yt ] = Linear::solve_t(t0, t1, RungeKutta::getTable(method), F0(0,0), F0, Fu, steps, ph);
-        control = ut; state = yt; show = true;
-    }
-
-    ImGui::SameLine();
-
-    if (ImGui::Button("Problem 2")) {
-        t0 = 0;
-        t1 = 3;
-
-        const auto ph = Eigen::MatrixXd::Constant(1, 1, 1.0);
-        const auto Fy = Eigen::Matrix<std::function<double(double)>, 1, 1>::Constant([](double t) { return .7; });
-        const auto Fu = Eigen::Matrix<std::function<double(double)>, 1, 1>::Constant([](double t) { return -1; });
-        const auto Fc = [](double t) { return .1*t; };
-
-        const auto [ut, yt] = Linear::solve_t(t0, t1, RungeKutta::getTable(method), Fc, Fy, Fu, steps, ph);
-        control = ut; state = yt; show = true;
-    }
-
-    ImGui::SameLine();
-
-    if (ImGui::Button("Problem 3")) {
-        const auto Fy = Eigen::Matrix<std::function<double(double)>, 2, 2>::Constant([](double t) { return 0; });
-        const auto Fc = [](double t) { return 0; };
-
-        Eigen::Matrix<std::function<double(double)>, 2, 2> Fu;
-        Eigen::Matrix<double, 1, 2> phi;
-
-        Fu << [](double t) { return -1.0; }, [](double t) { return 0.0; },
-              [](double t) { return 0.0; }, [](double t) { return 1.0; };
-
-        phi << 0.0, 1.0;
-
-        const double t0 = 0;
-        const double t1 = 1.0;
-
-        auto [ ut, yt ] = Linear::solve_t(t0, t1, RungeKutta::getTable(method), Fc, Fy, Fu, steps, phi, 1);
-        control = ut; state = yt; show = true;
-
-        x = ut[1];
-        y = yt[1];
-
-        time = std::vector<double>(x.size(), 0.0);
-        for (auto i = 0; i < x.size(); i++)
-            time[i] = ((t1 - t0) / steps) * i;
     }
 
     // ===== Timing Tests (Standard RK)
