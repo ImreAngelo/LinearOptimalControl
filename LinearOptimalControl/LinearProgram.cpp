@@ -56,6 +56,8 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, RungeKutta::B
         }
     }
 
+    //u(dim - 1, steps - 1).end();
+
     // Debug example 3 - TODO: Build algebraic constraints from function parameters, see solve()
     if (dim == 2)
     {
@@ -109,12 +111,14 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, RungeKutta::B
             auto& obj = objective[i];
 
             ctrl.reserve(steps - 1);
-            obj.reserve(steps - 1);
+            obj.reserve(steps);
 
             for (auto j = 0; j < steps - 1; j++) {
                 ctrl.emplace_back(cplex.getValue(u(i, j)));
                 obj.emplace_back(cplex.getValue(y(i, j)));
             }
+
+            obj.emplace_back(cplex.getValue(y(i, steps - 1)));
         }
 
         env.end();
@@ -129,6 +133,5 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, RungeKutta::B
     }
 
     std::cerr << "\n[Error] Could not solve, returning 0\n\n";
-    std::vector<double> zero(steps, 0);
-    return { MultiVector(dim, zero), MultiVector(dim, zero) };
+    return { MultiVector(dim, { (double)steps - 1, 0 }), MultiVector(dim, { (double)steps, 0 })};
 };
