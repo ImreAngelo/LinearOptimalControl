@@ -5,6 +5,71 @@
 #include <imgui.h>
 #include "ExampleProblems.h"
 
+
+void print(int n, int steps, int method)
+{
+    std::string s("");
+    switch (method)
+    {
+    case 0: s = "Euler's method"; break;
+    case 1: s = "implicit Euler's method"; break;
+    case 2: s = "Heun's 2nd order method"; break;
+    case 3: s = "classic RK4"; break;
+    }
+
+    std::cout << "\n\nRunning example " << n << " with " << steps << " steps of " << s << "\n";
+}
+
+double integrate(std::vector<double> f, double t0, double t1)
+{
+    const double dt = (t1 - t0) / f.size();
+    double sum = 0;
+
+    for (auto i = 0; i < f.size() - 1; i++)
+        sum += ((dt) / 2) * (f[i] + f[i + 1]);
+
+    return sum;
+}
+
+double get_err(std::vector<double> approx, double solution, double t0 = 0, double t1 = 1)
+{
+    const double a = integrate(approx, t0, t1);
+    // std::cout << "approximation: " << a << "\nsolution: " << b << "\n";
+    return std::abs(a - solution);
+}
+
+double get_err(std::vector<double> approx, std::vector<double> solution, double t0 = 0, double t1 = 1)
+{
+    const double b = integrate(solution, t0, t1);
+    return get_err(approx, b, t0, t1);
+}
+
+constexpr int stepsizes[] = { 10, 20, 40, 80, 160, 320 };
+// constexpr int stepsizes[] = { 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 120, 140, 160, 180, 200, 250, 300, 350, 300, 450 };
+
+void debug(std::function<Linear::Solution(double)> solve, std::tuple<Example::vf, Example::vf> solution, double t0 = 0, double t1 = 1)
+{
+#ifdef TIMING
+    std::cout << "\n\nSOLVING HIGH RESOLUTION (IGNORE)\n\n";
+#endif // TIMING
+
+    std::cout << "x, y\n";
+
+#if defined(TIMING) || defined(_DEBUG)
+     const auto [high_res_u, high_res_y] = solution;
+
+    for (auto i = 0; i < IM_ARRAYSIZE(stepsizes); i++)
+    {
+        int s = stepsizes[i];
+
+        const auto [ui, yi] = solve(s);
+
+        // std::cout << "Error Sum of Objective: " << std::setprecision(8) << get_err(yi[0], high_res_y[0], t0, t1) << "\n
+        std::cout << s << ", " << std::setprecision(8) << get_err(yi[0], high_res_y[0], t0, t1) << "\n";
+    }
+#endif // TIMING || _DEBUG
+}
+
 void Rendering::MainWindow::render()
 {
     ImGui::Begin("Menu");
@@ -34,7 +99,7 @@ void Rendering::MainWindow::render()
         Fy << [](double t) { return 0.5; };
         Fu << [](double t) { return 1.0; };
 
-        const auto [u,v] = Linear::solve_t(0, 1, RungeKutta::getTable(method), F0(0,0), Fy, Fu, steps + 1, Eigen::MatrixXd::Constant(1, 1, 2.0), 0);
+        const auto [u,v] = Linear::solve_t(0, 1, RungeKutta::getTable(method), F0(0,0), Fy, Fu, steps, Eigen::MatrixXd::Constant(1, 1, 2.0), 0);
         const auto [r,s] = Example::getSolution(steps);
         
         control = u; state = v; show = true;
@@ -43,82 +108,56 @@ void Rendering::MainWindow::render()
         double maxErrorX = 0, maxErrorY = 0;
 
         //x = std::vector<double>(steps - 1, 0.0);
-        //y = std::vector<double>(steps - 1, 0.0);
-
-        time = std::vector<double>(steps, 0.0);
+        //y = std::vector<double>(steps, 0.0);
+        time = std::vector<double>(steps, 0);
         for (auto i = 0; i < steps; i++)
         {
             time[i] = (1.0 / steps) * i;
 
-            if (i > 1)
-            {
-                maxErrorX = std::max(maxErrorX, u[0][i] - r[i]);
-                maxErrorY = std::max(maxErrorY, v[0][i] - s[i]);
-            }
-            /*x[i] = u[0][i] - r[i];
-            y[i] = v[0][i] - s[i];*/
-        }
+            maxErrorY = std::max(maxErrorY, abs(v[0][i] - s[i]));
+            //y[i] = abs(v[0][i] - s[i]);
 
-        //assert(v.size() == s.size());
-        //assert(u.size() == r.size());
+            if (i < steps - 1)
+            {
+                maxErrorX = std::max(maxErrorX, abs(u[0][i] - r[i]));
+                //x[i] = abs(u[0][i] - r[i]);
+            }
+        }
 
         std::cout << "\nMax error: " << maxErrorX << " and " << maxErrorY << "\n\n";
 
-        std::cout << "y: " << v[0][0] << "/" << s[0] << " -> " << v[0][v.size() - 1] << "/" << s[s.size() - 1] << "\n";
-        std::cout << "u: " << u[0][0] << "/" << r[0] << " -> " << u[0][u.size() - 1] << "/" << r[r.size() - 1] << "\n";
-    }
+        std::cout << "u: " << u[0][0] << "/" << r[0] << " -> " << u[0][u[0].size() - 1] << "/" << r[r.size() - 1] << "\n";
+        std::cout << "y: " << v[0][0] << "/" << s[0] << " -> " << v[0][v[0].size() - 1] << "/" << s[steps - 1] << "\n";
 
-    // ===== Timing Tests (Standard RK)
 
-    if (ImGui::Button("Timing Test #1"))
-    {
-        Eigen::Matrix<std::function<double(double)>, 1, 1> F0, Fy;
-        auto y0 = Eigen::MatrixXd::Constant(1, 1, 1.0);
+        std::cout << "\n\n\nAUTOMATED TIMING TEST:\n\n";
+        // debug([=](int s) { return Linear::solve_t(0, 1, RungeKutta::getTable(method), F0(0, 0), Fy, Fu, s, Eigen::MatrixXd::Constant(1, 1, 2.0), 0); }, Example::getSolution(500));
 
-        F0 << [](double t) { return 0.1*t; };
-        Fy << [](double t) { return -1.0; };
+        print(4, steps, method);
 
-        auto [r, t] = RungeKutta::solve(y0, F0, Fy, F0, steps, 5.0, 0.0, RungeKutta::getTable(method));
-
-        x = std::vector<double>(steps, 0.0);
-        y = std::vector<double>(steps, 0.0);
-
-        for (auto i = 0; i < steps; i++)
+        for (auto j = 0; j < IM_ARRAYSIZE(stepsizes); j++)
         {
-            x[i] = r[i](0, 0);
-            y[i] = 0;
+            double xMax = 0, yMax = 0;
+            int N = stepsizes[j];
+
+            const auto [sol_u, sol_y] = Example::getSolution(N);
+            const auto [ui, yi] = Linear::solve_t(0, 1, RungeKutta::getTable(method), F0(0, 0), Fy, Fu, N, Eigen::MatrixXd::Constant(1, 1, 2.0), 0);
+
+            // std::cout << "Error Sum of Objective: " << std::setprecision(8) << get_err(yi[0], high_res_y[0], t0, t1) << "\n
+            // std::cout << N << ", " << std::setprecision(8) << get_err(yi[0], s[0], t0, t1) << "\n";
+
+            for (auto i = 0; i < N - 1; i++)
+            {
+                /*
+                if (i > 0)
+                    xMax = std::max(xMax, ui[0][i] - sol_u[i]);
+                */
+                   
+                yMax = std::max(yMax, abs(yi[0][i] - sol_y[i]));
+            }
+
+            std::cout << N << ", " << std::setprecision(10) << yMax << "\n";
         }
-
-        time = t;
-    }
-
-    ImGui::SameLine();
-
-    if (ImGui::Button("Timing Test #2"))
-    {
-        constexpr double a = 1, b = 2, c = 3, d = 1;
-
-        Eigen::Matrix<std::function<double(double)>, 2, 2> F0, Fy;
-        auto y0 = Eigen::Matrix2d::Constant(2, 2, 1.0);
-
-        F0 << [](double t) { return 0.0; }, [](double t) { return 0.0; },
-              [](double t) { return 0.0; }, [](double t) { return 0.0; };
-
-        Fy << [](double t) { return a; }, [](double t) { return -b; },
-              [](double t) { return c; }, [](double t) { return -d; };
-
-        auto [ r, t ] = RungeKutta::solve(y0, F0, Fy, F0, steps, 5.0, 0.0, RungeKutta::getTable(method));
-
-        x = std::vector<double>(steps, 0.0);
-        y = std::vector<double>(steps, 0.0);
-
-        for (auto i = 0; i < steps; i++)
-        {
-            x[i] = r[i](0, 0);
-            y[i] = r[i](1, 0);
-        }
-
-        time = t;
     }
 
     // ===== Runge-Kutta Method
@@ -160,11 +199,11 @@ void Rendering::MainWindow::render()
         {
             std::cout << "\n\n == Control " << (d + 1) << " =============================\n" << std::setw(6) << "x, " << std::setw(4) << "y\n";
             for (auto i = 0; i < control[d].size(); i++)
-                std::cout << std::setw(6) << (3.0 / steps) * i << ", " << std::setw(4) << std::round(control[d][i] * 10000) / 10000 << std::endl;
+                std::cout << std::setw(6) << (1.0 / steps) * i << ", " << std::setw(4) << std::round(control[d][i] * 10000) / 10000 << std::endl;
 
             std::cout << "\n\n == State " << (d + 1) << " =============================\n" << std::setw(6) << "x, " << std::setw(4) << "y\n";
             for (auto i = 0; i < state[d].size(); i++)
-                std::cout << std::setw(6) << (3.0 / steps) * i << ", " << std::setw(4) << std::round(state[d][i] * 10000) / 10000 << std::endl;
+                std::cout << std::setw(6) << (1.0 / steps) * i << ", " << std::setw(4) << std::round(state[d][i] * 10000) / 10000 << std::endl;
         }
     }
 #endif // _DEBUG
@@ -183,7 +222,7 @@ void Rendering::MainWindow::render()
     // ===== Render Plots
 
     if (show) {
-        frame = PlotFrame("Example", t0, t1, control[0], state[0]);
+        frame = PlotFrame("Example", 0, 1, control[0], state[0]);
         show = false;
     }
 

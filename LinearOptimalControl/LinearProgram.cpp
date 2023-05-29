@@ -36,68 +36,62 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, RungeKutta::B
     TIME_FUNCTION();
 
     const double dt = (t1 - t0) / steps;
-    const size_t dim = Fu.cols();
+    const size_t m = Fu.cols();
 
     IloEnv env;
     IloModel model(env);
 
-    // Populate matrices
-    Matrix<IloNumVar> u(dim, steps);
-    Matrix<IloNumVar> y(dim, steps);
+    // Parameterize u, y
+    Matrix<IloNumVar> u(m, steps);
+    Matrix<IloNumVar> y(m, steps);
 
     for (auto j = 0; j < steps; j++) {   // Col
-        for (auto i = 0; i < dim; i++) { // Row
+        for (auto i = 0; i < m; i++) { // Row
             u(i, j) = IloNumVar(env, -FLT_MAX, FLT_MAX);
             y(i, j) = IloNumVar(env, -FLT_MAX, FLT_MAX);
         }
     }
 
-    // Complete Parameterization
+    // Discretize State
     RungeKutta::parameterize(model, y, u, Fc, Fy, Fu, dt, t0, butcherTable);
 
     // Build objective function
     const IloNumExprArg obj = integrate(env, u, y, yPhi, dt, steps, t0, p);
     model.add(IloMinimize(env, obj));
 
-    TIMER_START("Set boundary");
-
     // Add boundary conditions
-    // TODO: Boundary matrices as function parameters
-    for(auto i = 0; i < dim; i++)
+    for(auto i = 0; i < m; i++)
         model.add(y(i, 0) == 1);
+    model.add(u(0, 0) == -1.728328996);
 
     try {
-        // Solve
         TIMER_START("CPLEX");
 
         IloCplex cplex(model);
 
-#ifdef _DEBUG
-        std::cout << "\n[CPLEX] ";
-#else
         cplex.setOut(env.getNullStream());
-#endif // _DEBUG
-
         cplex.solve();
 
         TIMER_STOP();
 
         // Output
-        auto control = MultiVector(dim);
-        auto objective = MultiVector(dim);
+        auto control = MultiVector(m);
+        auto objective = MultiVector(m);
 
-        for (auto i = 0; i < dim; i++)
+        for (auto i = 0; i < m; i++)
         {
             auto& ctrl = control[i];
             auto& obj = objective[i];
 
             ctrl.reserve(steps - 1);
-            obj.reserve(steps - 1);
+            obj.reserve(steps);
 
             for (auto j = 0; j < steps - 1; j++) {
                 ctrl.emplace_back(cplex.getValue(u(i, j)));
                 obj.emplace_back(cplex.getValue(y(i, j)));
             }
+
+            obj.emplace_back(cplex.getValue(y(i, steps - 1)));
         }
 
         env.end();
@@ -112,6 +106,5 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, RungeKutta::B
     }
 
     std::cerr << "\n[Error] Could not solve, returning 0\n\n";
-    std::vector<double> zero(steps, 0);
-    return { MultiVector(dim, zero), MultiVector(dim, zero) };
+    return { MultiVector(m, { (double)(steps - 1), 0 }), MultiVector(m, { (double)steps, 0 })};
 };

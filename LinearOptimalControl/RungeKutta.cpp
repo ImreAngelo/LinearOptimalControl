@@ -17,17 +17,18 @@ void RungeKutta::parameterize(IloModel& model, const IloMatrix& y, const IloMatr
     const IloNumVar z(env, -FLT_MAX, FLT_MAX, ILOFLOAT);
     const IloNumExpr zero = z - z;
 
+    //std::cout << "RK: ";
+
     for (auto n = 0; n < steps - 1; n++)
     {
         const double t = n * dt + t0;
+
+        //std::cout << t << ", ";
 
         // Each row is a order, and each column is a dimension
         Matrix<IloNumExpr> k = Matrix<IloNumExpr>::Constant(table.order, m, zero);
 
         // ===== Intermediary step
-        // *** TODO: 
-        //  - Use matrix operations instead of std::vectors
-        //  - I.e. sum = a.row(i) * k(i)
 
         for (auto i = 0; i < table.order; i++)
         {
@@ -36,11 +37,9 @@ void RungeKutta::parameterize(IloModel& model, const IloMatrix& y, const IloMatr
 
             for (auto j = 0; j < m; j++)
             {
-                // NOTE: This is more efficient that use the zero trick
-                //IloNumExpr expr = k(0, j) * table.a[i][0];
-                IloNumExpr expr = zero;
+                IloNumExpr expr = k(0, j) * table.a[i][0];
 
-                for (auto ii = 0; ii < table.order; ii++)
+                for (auto ii = 1; ii < table.order; ii++)
                     expr = expr + k(ii, j) * table.a[i][ii];
                 
                 sum(j) = expr;
@@ -66,14 +65,16 @@ void RungeKutta::parameterize(IloModel& model, const IloMatrix& y, const IloMatr
 
         for (auto j = 0; j < m; j++)
         {
-            IloNumExpr biki = zero;
+            IloNumExpr biki = k(0, j) * table.b[0];
 
-            for (auto i = 0; i < table.order; i++)
+            for (auto i = 1; i < table.order; i++)
                 biki = biki + k(i, j) * table.b[i];
 
             model.add(y(j, n + 1) == y(j, n) + biki);
         }
     }
+
+    //std::cout << "\n";
 }
 
 RungeKutta::ret RungeKutta::solve(const Eigen::MatrixXd& y0, const FMatrix& Fc, const FMatrix& Fy, const FMatrix& Fu, size_t steps, double t1, double t0, ButcherTable table)
