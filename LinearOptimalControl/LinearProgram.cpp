@@ -28,7 +28,7 @@ inline IloNumExprArg integrate(const IloEnv& env, const Matrix<IloNumVar>& u, co
     }
 
     zero.end(); // This does nothing
-    return obj;
+    return (obj/2);
 }
 
 Linear::Solution Linear::solve_t(const double t0, const double t1, RungeKutta::ButcherTable butcherTable, Func Fc, MatrixT Fy, MatrixT Fu, size_t steps, const Eigen::MatrixXd yPhi, double p)
@@ -62,7 +62,8 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, RungeKutta::B
     // Add boundary conditions
     for(auto i = 0; i < m; i++)
         model.add(y(i, 0) == 1);
-    model.add(u(0, 0) == -1.728328996);
+
+    //model.add(u(0, 0) == -1.728328996);
 
     try {
         TIMER_START("CPLEX");

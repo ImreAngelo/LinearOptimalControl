@@ -44,30 +44,38 @@ double get_err(std::vector<double> approx, std::vector<double> solution, double 
     return get_err(approx, b, t0, t1);
 }
 
-constexpr int stepsizes[] = { 10, 20, 40, 80, 160, 320 };
-// constexpr int stepsizes[] = { 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 120, 140, 160, 180, 200, 250, 300, 350, 300, 450 };
+double get_max_err(std::vector<double> a, std::vector<double> b)
+{
+    double max = 0;
+    for (auto i = 0; i < a.size(); i++)
+        max = std::max(max, abs(a[i] - b[i]));
+    return max;
+}
+
+// constexpr int stepsizes[] = { 10, 20, 40, 80, 160, 320 };
+constexpr int stepsizes[] = { 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 120, 140, 160, 180, 200, 250, 300, 350, 400, 450, 500 };
 
 void debug(std::function<Linear::Solution(double)> solve, std::tuple<Example::vf, Example::vf> solution, double t0 = 0, double t1 = 1)
 {
-#ifdef TIMING
-    std::cout << "\n\nSOLVING HIGH RESOLUTION (IGNORE)\n\n";
-#endif // TIMING
-
+#ifdef _DEBUG
     std::cout << "x, y\n";
 
-#if defined(TIMING) || defined(_DEBUG)
-     const auto [high_res_u, high_res_y] = solution;
+    //const auto [high_res_u, high_res_y] = solution;
 
     for (auto i = 0; i < IM_ARRAYSIZE(stepsizes); i++)
     {
         int s = stepsizes[i];
 
+        const auto [high_res_u, high_res_y] = Example::getSolution(s);
         const auto [ui, yi] = solve(s);
 
         // std::cout << "Error Sum of Objective: " << std::setprecision(8) << get_err(yi[0], high_res_y[0], t0, t1) << "\n
-        std::cout << s << ", " << std::setprecision(8) << get_err(yi[0], high_res_y[0], t0, t1) << "\n";
+        // std::cout << s << ", " << std::setprecision(8) << get_err(yi[0], high_res_y[0], t0, t1) << "\n";
+
+        //std::cout << s << ", " << std::setprecision(8) << get_max_err(ui[0], high_res_u) << "\n";
+        std::cout << s << ", " << std::setprecision(8) << get_max_err(yi[0], high_res_y) << "\n";
     }
-#endif // TIMING || _DEBUG
+#endif // _DEBUG
 }
 
 void Rendering::MainWindow::render()
@@ -115,12 +123,12 @@ void Rendering::MainWindow::render()
             time[i] = (1.0 / steps) * i;
 
             maxErrorY = std::max(maxErrorY, abs(v[0][i] - s[i]));
-            //y[i] = abs(v[0][i] - s[i]);
+            y[i] = abs(v[0][i] - s[i]);
 
             if (i < steps - 1)
             {
                 maxErrorX = std::max(maxErrorX, abs(u[0][i] - r[i]));
-                //x[i] = abs(u[0][i] - r[i]);
+                x[i] = abs(u[0][i] - r[i]);
             }
         }
 
@@ -129,6 +137,7 @@ void Rendering::MainWindow::render()
         std::cout << "u: " << u[0][0] << "/" << r[0] << " -> " << u[0][u[0].size() - 1] << "/" << r[r.size() - 1] << "\n";
         std::cout << "y: " << v[0][0] << "/" << s[0] << " -> " << v[0][v[0].size() - 1] << "/" << s[steps - 1] << "\n";
 
+#ifdef _DEBUG
 
         std::cout << "\n\n\nAUTOMATED TIMING TEST:\n\n";
         // debug([=](int s) { return Linear::solve_t(0, 1, RungeKutta::getTable(method), F0(0, 0), Fy, Fu, s, Eigen::MatrixXd::Constant(1, 1, 2.0), 0); }, Example::getSolution(500));
@@ -158,6 +167,8 @@ void Rendering::MainWindow::render()
 
             std::cout << N << ", " << std::setprecision(10) << yMax << "\n";
         }
+
+#endif // _DEBUG
     }
 
     // ===== Runge-Kutta Method
