@@ -52,34 +52,37 @@ double get_max_err(std::vector<double> a, std::vector<double> b)
     return max;
 }
 
-// constexpr int stepsizes[] = { 10, 20, 40, 80, 160, 320 };
 constexpr int stepsizes[] = { 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 120, 140, 160, 180, 200, 250, 300, 350, 400, 450, 500 };
 
-void debug(std::function<Linear::Solution(double)> solve, std::tuple<Example::vf, Example::vf> solution, double t0 = 0, double t1 = 1)
+void debug(std::function<Linear::Solution(int)> solve, std::tuple<Example::vf, Example::vf> solution, double t0 = 0, double t1 = 1)
 {
 #ifdef TIMING
-    std::cout << "x, y\n";
+    std::cout << "\n\nSOLVING HIGH RESOLUTION (IGNORE)\n\n";
+#endif // TIMING
 
-    //const auto [high_res_u, high_res_y] = solution;
+    constexpr int runs = IM_ARRAYSIZE(stepsizes);
+    std::vector<double> min(runs, 0.0);
+    std::vector<double> max(runs, 0.0);
+    std::vector<double> sum(runs, 0.0);
+
+#ifdef TIMING
+
+    std::cout << "\n\nn, int, param, cplex";
 
     for (auto i = 0; i < IM_ARRAYSIZE(stepsizes); i++)
     {
-        int s = stepsizes[i];
+        std::cout << "\n" << stepsizes[i] << ", " << std::setprecision(8);
 
-        const auto [high_res_u, high_res_y] = Example::getSolution(s);
-        const auto [ui, yi] = solve(s);
+        const auto [ui, yi] = solve(stepsizes[i]);
+    }
 
-        // std::cout << "Error Sum of Objective: " << std::setprecision(8) << get_err(yi[0], high_res_y[0], t0, t1) << "\n
-        // std::cout << s << ", " << std::setprecision(8) << get_err(yi[0], high_res_y[0], t0, t1) << "\n";
+#endif // TIMING
 
-        //std::cout << s << ", " << std::setprecision(8) << get_max_err(ui[0], high_res_u) << "\n";
-        std::cout << s << ", " << std::setprecision(8) << get_max_err(yi[0], high_res_y) << "\n";
-}
-#endif // _DEBUG
+
 #ifdef _DEBUG
     std::cout << "x, y\n";
 
-    //const auto [high_res_u, high_res_y] = solution;
+    const auto [high_res_u, high_res_y] = solution;
 
     for (auto i = 0; i < IM_ARRAYSIZE(stepsizes); i++)
     {
@@ -155,6 +158,12 @@ void Rendering::MainWindow::render()
 
         std::cout << "u: " << u[0][0] << "/" << r[0] << " -> " << u[0][u[0].size() - 1] << "/" << r[r.size() - 1] << "\n";
         std::cout << "y: " << v[0][0] << "/" << s[0] << " -> " << v[0][v[0].size() - 1] << "/" << s[steps - 1] << "\n";
+
+#ifdef TIMING
+        debug([=](int st) { return Linear::solve_t(0, 1, RungeKutta::getTable(method), F0(0, 0), Fy, Fu, st, Eigen::MatrixXd::Constant(1, 1, 2.0), 0); }, Example::getSolution(500));
+#endif // TIMING
+
+
 
 #ifdef _DEBUG
 
