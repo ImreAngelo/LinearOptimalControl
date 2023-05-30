@@ -57,6 +57,25 @@ constexpr int stepsizes[] = { 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 120, 140,
 
 void debug(std::function<Linear::Solution(double)> solve, std::tuple<Example::vf, Example::vf> solution, double t0 = 0, double t1 = 1)
 {
+#ifdef TIMING
+    std::cout << "x, y\n";
+
+    //const auto [high_res_u, high_res_y] = solution;
+
+    for (auto i = 0; i < IM_ARRAYSIZE(stepsizes); i++)
+    {
+        int s = stepsizes[i];
+
+        const auto [high_res_u, high_res_y] = Example::getSolution(s);
+        const auto [ui, yi] = solve(s);
+
+        // std::cout << "Error Sum of Objective: " << std::setprecision(8) << get_err(yi[0], high_res_y[0], t0, t1) << "\n
+        // std::cout << s << ", " << std::setprecision(8) << get_err(yi[0], high_res_y[0], t0, t1) << "\n";
+
+        //std::cout << s << ", " << std::setprecision(8) << get_max_err(ui[0], high_res_u) << "\n";
+        std::cout << s << ", " << std::setprecision(8) << get_max_err(yi[0], high_res_y) << "\n";
+}
+#endif // _DEBUG
 #ifdef _DEBUG
     std::cout << "x, y\n";
 
