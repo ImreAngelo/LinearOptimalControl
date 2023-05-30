@@ -53,6 +53,11 @@ void debug(std::function<Linear::Solution(size_t, int)> solve, int method, doubl
 
     const auto [high_res_u, high_res_y] = solve((solution) ? 1 : 500, 3);
 
+    constexpr int runs = IM_ARRAYSIZE(stepsizes);
+    std::vector<double> min(runs, 0.0);
+    std::vector<double> max(runs, 0.0);
+    std::vector<double> sum(runs, 0.0);
+
 #ifdef TIMING
 
     std::cout << "\n\nn, int, param, cplex";
