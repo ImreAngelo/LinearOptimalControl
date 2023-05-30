@@ -10,7 +10,7 @@ using Matrix = MatrixUtil::Matrix<T>;
 /// </summary>
 inline IloNumExprArg integrate(const IloEnv& env, const Matrix<IloNumVar>& y, const Eigen::MatrixXd yPhi, const double dt, const size_t steps, const double t0, const double p)
 {
-    TIMER_START("Integration");
+    TIME_FUNCTION();
     
     IloNumVar zero(env, 0, 0);
     IloNumExprArg obj = zero - zero;
@@ -33,7 +33,7 @@ inline IloNumExprArg integrate(const IloEnv& env, const Matrix<IloNumVar>& y, co
 
 Linear::Solution Linear::solve_t(const double t0, const double t1, RungeKutta::ButcherTable butcherTable, Func Fc, MatrixT Fy, MatrixT Fu, size_t steps, const Eigen::MatrixXd yPhi, double p)
 {
-    TIME_FUNCTION();
+    // TIME_FUNCTION();
 
     const double dt = (t1 - t0) / steps;
     const size_t dim = Fu.cols();
@@ -78,7 +78,7 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, RungeKutta::B
     const IloNumExprArg obj = integrate(env, y, yPhi, dt, steps, t0, p);
     model.add(IloMinimize(env, obj));
 
-    TIMER_START("Set boundary");
+    // TIMER_START("Set boundary");
 
     // Add boundary conditions
     // TODO: Boundary matrices as function parameters
@@ -91,7 +91,7 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, RungeKutta::B
 
         IloCplex cplex(model);
 
-#ifdef _DEBUG
+#ifdef FALSE
         std::cout << "\n[CPLEX] ";
 #else
         cplex.setOut(env.getNullStream());

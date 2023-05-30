@@ -40,9 +40,9 @@ void RungeKutta::parameterize(IloModel& model, const IloMatrix y, const IloMatri
             for (auto j = 0; j < dims; j++)
             {
                 // NOTE: 
-                IloNumExpr expr = k(0, j) * table.a[i][0];
+                IloNumExpr expr = zero;
 
-                for (auto ii = 1; ii < table.order; ii++)
+                for (auto ii = 0; ii < table.order; ii++)
                     expr = expr + k(ii, j) * table.a[i][ii];
                 
                 sum(j) = expr;
@@ -68,9 +68,9 @@ void RungeKutta::parameterize(IloModel& model, const IloMatrix y, const IloMatri
 
         for (auto d = 0; d < dims; d++)
         {
-            IloNumExpr biki = k(0, d) * table.b[0];
+            IloNumExpr biki = zero;
 
-            for (auto i = 1; i < table.order; i++)
+            for (auto i = 0; i < table.order; i++)
                 biki = biki + k(i, d) * table.b[i];
 
             model.add(y(d, n + 1) == y(d, n) + biki);
