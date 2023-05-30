@@ -42,8 +42,8 @@ double get_err(std::vector<double> approx, std::vector<double> solution, double 
     return get_err(approx, b, t0, t1);
 }
 
-// constexpr int stepsizes[] = { 10, 20, 40, 80, 120, 160, 200, 250 };
-constexpr size_t stepsizes[] = { 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 120, 140, 160, 180, 200, }; // 250, 300, 350, 400, 450, 500 };
+constexpr int stepsizes[] = { 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 120, 140, 160, 180, 200, 250 };
+//constexpr size_t stepsizes[] = { 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 120, 140, 160, 180, 200, 250, 300, 350, 400, 450, 500 };
 
 void debug(std::function<Linear::Solution(size_t, int)> solve, int method, double t0 = 0, double t1 = 1, double solution = 0)
 {
@@ -51,10 +51,23 @@ void debug(std::function<Linear::Solution(size_t, int)> solve, int method, doubl
     std::cout << "\n\nSOLVING HIGH RESOLUTION (IGNORE)\n\n";
 #endif // TIMING
 
-    std::cout << "x, y\n";
-
-#if defined(TIMING) || defined(_DEBUG)
     const auto [high_res_u, high_res_y] = solve((solution) ? 1 : 500, 3);
+
+#ifdef TIMING
+
+    std::cout << "\n\nn, int, param, cplex";
+
+    for (auto i = 0; i < IM_ARRAYSIZE(stepsizes); i++)
+    {
+        std::cout << "\n" << stepsizes[i] << ", " << std::setprecision(8);
+
+        const auto [ui, yi] = solve(stepsizes[i], method);
+    }
+
+#endif // TIMING
+#ifdef _DEBUG
+
+    std::cout << "\n\nn, param, cplex";
 
     for (auto i = 0; i < IM_ARRAYSIZE(stepsizes); i++)
     {
@@ -63,7 +76,9 @@ void debug(std::function<Linear::Solution(size_t, int)> solve, int method, doubl
         // std::cout << "Objective: " << std::setprecision(8) << integrate(yi[1], t0, t1) << " / " << solution << "\n";
         // std::cout << "Error Sum of Objective: " << std::setprecision(8) << get_err(yi[0], high_res_y[0], t0, t1) << "\n";
     }
-#endif // TIMING || _DEBUG
+
+#endif // _DEBUG
+
 }
 
 void Rendering::MainWindow::render()
@@ -245,7 +260,7 @@ void Rendering::MainWindow::render()
     
     // ===== Print CSV
 
-#ifdef _DEBUG
+//#ifdef _DEBUG
     // Print CSV for thesis graphs
     if (ImGui::Button("Print CSV to console"))
     {
@@ -260,7 +275,7 @@ void Rendering::MainWindow::render()
                 std::cout << std::setw(6) << ((t1 - t0) / (steps - 1)) * i << ", " << std::setw(4) << std::round(state[d][i] * 10000) / 10000 << std::endl;
         }
     }
-#endif // _DEBUG
+//#endif // _DEBUG
 
     // ===== End GUI
 

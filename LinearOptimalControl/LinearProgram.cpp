@@ -71,12 +71,12 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, RungeKutta::B
         }
     }
 
-    // Complete Parameterization
-    RungeKutta::parameterize(model, y, u, Fc, Fy, Fu, dt, t0, butcherTable);
-
     // Build objective function
     const IloNumExprArg obj = integrate(env, y, yPhi, dt, steps, t0, p);
     model.add(IloMinimize(env, obj));
+
+    // Complete Parameterization
+    RungeKutta::parameterize(model, y, u, Fc, Fy, Fu, dt, t0, butcherTable);
 
     // TIMER_START("Set boundary");
 
