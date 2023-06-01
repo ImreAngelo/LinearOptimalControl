@@ -201,7 +201,7 @@ void Rendering::MainWindow::render()
 
     // ===== Runge-Kutta Method
 
-    const char* items[] = { "Euler's", "Implicit Euler", "Heun's 2nd Order", "Classic RK4" };
+    const char* items[] = { "Euler's", "Implicit Euler", "Heun's 2nd Order", "Classic RK4", "Ralston 4"};
 
     ImGui::Dummy(ImVec2(0.0f, 10.0f));
     ImGui::Text("Runge-Kutta Options");
@@ -234,15 +234,12 @@ void Rendering::MainWindow::render()
     // Print CSV for thesis graphs
     if (ImGui::Button("Print CSV to console"))
     {
-        for (auto d = 0; d < control.size(); d++)
+        for (auto d = 0; d < state.size(); d++)
         {
-            std::cout << "\n\n == Control " << (d + 1) << " =============================\n" << std::setw(6) << "x, " << std::setw(4) << "y\n";
-            for (auto i = 0; i < control[d].size(); i++)
-                std::cout << std::setw(6) << (1.0 / steps) * i << ", " << std::setw(4) << std::round(control[d][i] * 10000) / 10000 << std::endl;
-
-            std::cout << "\n\n == State " << (d + 1) << " =============================\n" << std::setw(6) << "x, " << std::setw(4) << "y\n";
-            for (auto i = 0; i < state[d].size(); i++)
-                std::cout << std::setw(6) << (1.0 / steps) * i << ", " << std::setw(4) << std::round(state[d][i] * 10000) / 10000 << std::endl;
+            std::cout << "\n\n == Dimension " << (d + 1) << " =============================\n" << std::setw(10) << "t" << "," << std::setw(10) << "u" << "," << std::setw(10) << "y\n";
+            std::cout << std::setprecision(8);
+            for (auto i = 0; i < steps; i++)
+                std::cout << std::setw(10) << ((t1 - t0) / (steps - 1)) * i << ", " << std::setw(10) << std::round(control[d][(int)std::min(i, steps - 2)] * 10000) / 10000 << ", " << std::setw(10) << std::round(state[d][i] * 10000) / 10000 << std::endl;
         }
     }
 #endif // _DEBUG
