@@ -47,10 +47,7 @@ constexpr int stepsizes[] = { 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 120, 140,
 
 void debug(std::function<Linear::Solution(size_t, int)> solve, int method, double t0 = 0, double t1 = 1, double solution = 0)
 {
-#ifdef TIMING
     std::cout << "\n\nSOLVING HIGH RESOLUTION (IGNORE)\n\n";
-#endif // TIMING
-
     const auto [high_res_u, high_res_y] = solve((solution) ? 1 : 500, 3);
 
 #ifdef TIMING
