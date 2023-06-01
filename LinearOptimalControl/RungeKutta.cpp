@@ -39,8 +39,9 @@ void RungeKutta::parameterize(IloModel& model, const IloMatrix& y, const IloMatr
             {
                 IloNumExpr expr = k(0, j) * table.a[i][0];
 
-                for (auto ii = 1; ii < j; ii++)
-                    expr = expr + k(ii, j) * table.a[i][ii];
+                for (auto ii = 1; ii < table.order; ii++)
+                    if(table.a[i][ii])
+                        expr = expr + k(ii, j) * table.a[i][ii];
                 
                 sum(j) = expr;
             }
