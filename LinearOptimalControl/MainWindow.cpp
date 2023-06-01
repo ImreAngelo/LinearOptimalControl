@@ -72,12 +72,11 @@ void debug(std::function<Linear::Solution(size_t, int)> solve, int method, doubl
 #endif // TIMING
 #ifdef _DEBUG
 
-    std::cout << "\n\nn, param, cplex";
+    std::cout << "\n\nn, param, cplex\n";
 
     for (auto i = 0; i < IM_ARRAYSIZE(stepsizes); i++)
     {
         const auto [ui, yi] = solve(stepsizes[i], method);
-
 
         std::cout << stepsizes[i] << ", " << std::setprecision(8) << ((solution) ? get_err(yi[0], solution, t0, t1) : get_err(yi[0], high_res_y[0], t0, t1)) << "\n";
         // std::cout << "Objective: " << std::setprecision(8) << integrate(yi[1], t0, t1) << " / " << solution << "\n";
