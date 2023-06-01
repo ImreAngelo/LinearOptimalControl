@@ -30,6 +30,7 @@ namespace RungeKutta
     static const ButcherTable euler{ {0},{{0}},{1} };
     static const ButcherTable heun{ {0, 1}, { {0,0},{1,0} }, { 1.0 / 2.0, 1.0 / 2.0 } };
     static const ButcherTable rk4{ {0,.5,.5,1}, {{ 0, 0, 0, 0 },{ .5, 0, 0, 0 },{ 0, .5, 0, 0 },{ 0, 0, 1, 0},},{(1/6.0), (1/3.0), (1/3.0), (1/6.0)} };
+    static const ButcherTable ralston4{ {0,.4,.45573725,1}, {{ 0, 0, 0, 0 },{ .4, 0, 0, 0 },{ 0, .29697761, .15875964, 0 },{ .21810040, -3.05096516, 3.83286476, 0},},{(.17476028), (-.55148066), (1.20553560), (.17118478)} };
 
 
     // ===== PARAMETERIZATION

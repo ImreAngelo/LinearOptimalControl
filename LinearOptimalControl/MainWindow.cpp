@@ -77,6 +77,8 @@ void debug(std::function<Linear::Solution(size_t, int)> solve, int method, doubl
     for (auto i = 0; i < IM_ARRAYSIZE(stepsizes); i++)
     {
         const auto [ui, yi] = solve(stepsizes[i], method);
+
+
         std::cout << stepsizes[i] << ", " << std::setprecision(8) << ((solution) ? get_err(yi[0], solution, t0, t1) : get_err(yi[0], high_res_y[0], t0, t1)) << "\n";
         // std::cout << "Objective: " << std::setprecision(8) << integrate(yi[1], t0, t1) << " / " << solution << "\n";
         // std::cout << "Error Sum of Objective: " << std::setprecision(8) << get_err(yi[0], high_res_y[0], t0, t1) << "\n";
@@ -142,6 +144,8 @@ void Rendering::MainWindow::render()
     ImGui::SameLine();
 
     if (ImGui::Button("Problem 3")) {
+        t0 = 0; t1 = 1;
+
         const auto Fy = Eigen::Matrix<std::function<double(double)>, 2, 2>::Constant([](double t) { return 0; });
         const auto Fc = [](double t) { return 0; };
 
@@ -152,9 +156,6 @@ void Rendering::MainWindow::render()
               [](double t) { return 0.0; }, [](double t) { return 1.0; };
 
         phi << 0.0, -1.0;
-
-        const double t0 = 0;
-        const double t1 = 1.0;
 
         print(3, steps, method);
 
@@ -168,10 +169,6 @@ void Rendering::MainWindow::render()
         for (auto i = 0; i < x.size(); i++)
             time[i] = ((t1 - t0) / steps) * i;
 
-#ifdef _TIMING
-        std::cout << "\n\nSOLVING HIGH RESOLUTION (IGNORE)\n\n";
-#endif // _TIMING
-
         const auto [high_res_u, high_res_y] = Linear::solve_t(t0, t1, RungeKutta::getTable(method), Fc, Fy, Fu, 249, phi, 1);
         const auto err = get_err(yt[1], high_res_y[1], t0, t1);
         const auto sol = integrate(high_res_y[1], t0, t1);
@@ -181,62 +178,9 @@ void Rendering::MainWindow::render()
         debug([=](size_t s, int m) { return Linear::solve_t(t0, t1, RungeKutta::getTable(m), Fc, Fy, Fu, s, phi, 1); }, method, t0, t1, sol);
     }
 
-    // ===== Timing Tests (Standard RK)
-
-    if (ImGui::Button("Timing Test #1"))
-    {
-        Eigen::Matrix<std::function<double(double)>, 1, 1> F0, Fy;
-        auto y0 = Eigen::MatrixXd::Constant(1, 1, 1.0);
-
-        F0 << [](double t) { return 0.1*t; };
-        Fy << [](double t) { return -1.0; };
-
-        auto [r, t] = RungeKutta::solve(y0, F0, Fy, F0, steps, 5.0, 0.0, RungeKutta::getTable(method));
-
-        x = std::vector<double>(steps, 0.0);
-        y = std::vector<double>(steps, 0.0);
-
-        for (auto i = 0; i < steps; i++)
-        {
-            x[i] = r[i](0, 0);
-            y[i] = 0;
-        }
-
-        time = t;
-    }
-
-    ImGui::SameLine();
-
-    if (ImGui::Button("Timing Test #2"))
-    {
-        constexpr double a = 1, b = 2, c = 3, d = 1;
-
-        Eigen::Matrix<std::function<double(double)>, 2, 2> F0, Fy;
-        auto y0 = Eigen::Matrix2d::Constant(2, 2, 1.0);
-
-        F0 << [](double t) { return 0.0; }, [](double t) { return 0.0; },
-              [](double t) { return 0.0; }, [](double t) { return 0.0; };
-
-        Fy << [](double t) { return a; }, [](double t) { return -b; },
-              [](double t) { return c; }, [](double t) { return -d; };
-
-        auto [ r, t ] = RungeKutta::solve(y0, F0, Fy, F0, steps, 5.0, 0.0, RungeKutta::getTable(method));
-
-        x = std::vector<double>(steps, 0.0);
-        y = std::vector<double>(steps, 0.0);
-
-        for (auto i = 0; i < steps; i++)
-        {
-            x[i] = r[i](0, 0);
-            y[i] = r[i](1, 0);
-        }
-
-        time = t;
-    }
-
     // ===== Runge-Kutta Method
 
-    const char* items[] = { "Euler's", "Implicit Euler", "Heun's 2nd Order", "Classic RK4" };
+    const char* items[] = { "Euler's", "Implicit Euler", "Heun's 2nd Order", "Classic RK4", "Ralston's 4th Order"};
 
     ImGui::Dummy(ImVec2(0.0f, 10.0f));
     ImGui::Text("Runge-Kutta Options");
@@ -269,15 +213,12 @@ void Rendering::MainWindow::render()
     // Print CSV for thesis graphs
     if (ImGui::Button("Print CSV to console"))
     {
-        for (auto d = 0; d < control.size(); d++)
+        for (auto d = 0; d < state.size(); d++)
         {
-            std::cout << "\n\n == Control " << (d + 1) << " =============================\n" << std::setw(6) << "x, " << std::setw(4) << "y\n";
-            for (auto i = 0; i < control[d].size(); i++)
-                std::cout << std::setw(6) << ((t1 - t0) / (steps - 1)) * i << ", " << std::setw(4) << std::round(control[d][i] * 10000) / 10000 << std::endl;
-
-            std::cout << "\n\n == State " << (d + 1) << " =============================\n" << std::setw(6) << "x, " << std::setw(4) << "y\n";
-            for (auto i = 0; i < state[d].size(); i++)
-                std::cout << std::setw(6) << ((t1 - t0) / (steps - 1)) * i << ", " << std::setw(4) << std::round(state[d][i] * 10000) / 10000 << std::endl;
+            std::cout << "\n\n == Dimension " << (d + 1) << " =============================\n" << std::setw(10) << "t" << "," << std::setw(10) << "u" << "," << std::setw(10) << "y\n";
+            std::cout << std::setprecision(8);
+            for (auto i = 0; i < steps; i++)
+                std::cout << std::setw(10) << ((t1 - t0) / (steps - 1)) * i << ", " << std::setw(10) << std::round(control[d][(int)std::min(i, steps - 2)] * 10000) / 10000 << ", " << std::setw(10) << std::round(state[d][i] * 10000) / 10000 << std::endl;
         }
     }
 //#endif // _DEBUG
