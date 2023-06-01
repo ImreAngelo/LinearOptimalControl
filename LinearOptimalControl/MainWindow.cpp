@@ -53,11 +53,6 @@ void debug(std::function<Linear::Solution(size_t, int)> solve, int method, doubl
 
     const auto [high_res_u, high_res_y] = solve((solution) ? 1 : 500, 3);
 
-    constexpr int runs = IM_ARRAYSIZE(stepsizes);
-    std::vector<double> min(runs, 0.0);
-    std::vector<double> max(runs, 0.0);
-    std::vector<double> sum(runs, 0.0);
-
 #ifdef TIMING
 
     std::cout << "\n\nn, int, param, cplex";
@@ -72,7 +67,8 @@ void debug(std::function<Linear::Solution(size_t, int)> solve, int method, doubl
 #endif // TIMING
 #ifdef _DEBUG
 
-    std::cout << "\n\nn, param, cplex\n";
+    //std::cout << "\n\nn, param, cplex\n";
+    std::cout << "\n\nn, y\n";
 
     for (auto i = 0; i < IM_ARRAYSIZE(stepsizes); i++)
     {
