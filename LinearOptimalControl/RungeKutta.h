@@ -54,6 +54,7 @@ namespace RungeKutta
         case 1: return RungeKutta::backward_euler;
         case 2: return RungeKutta::heun;
         case 3: return RungeKutta::rk4;
+        case 4: return RungeKutta::ralston4;
         }
     }
 
