@@ -32,8 +32,8 @@ double integrate(std::vector<double> f, double t0, double t1)
 double get_err(std::vector<double> approx, double solution, double t0 = 0, double t1 = 1)
 {
     const double a = integrate(approx, t0, t1);
-    // std::cout << "approximation: " << a << "\nsolution: " << b << "\n";
-    return std::abs(a - solution);
+     std::cout << "Objective: " << a << " / " << solution << "\n";
+    return a - solution;
 }
 
 double get_err(std::vector<double> approx, std::vector<double> solution, double t0 = 0, double t1 = 1)
