@@ -45,12 +45,9 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, RungeKutta::B
     Matrix<IloNumVar> u(dim, steps);
     Matrix<IloNumVar> y(dim, steps);
 
-    // Cheat for example 3 - TODO: Take lb & ub as parameters
-    constexpr float max[2] = { FLT_MAX, 0.0f };
-    constexpr float min[2] = { 0.0f,-FLT_MAX };
-
     for (auto j = 0; j < steps; j++) {   // Col
         for (auto i = 0; i < dim; i++) { // Row
+            // Cheat for example 3
             u(i, j) = (dim == 2) ? IloNumVar(env, 0, 10, IloNumVar::Float) : IloNumVar(env, 0, 1);
             y(i, j) = IloNumVar(env, 0, FLT_MAX);
         }
@@ -90,6 +87,7 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, RungeKutta::B
         TIMER_START("CPLEX");
 
         IloCplex cplex(model);
+        cplex.setParam(IloCplex::Threads, 8);
 
 #ifdef FALSE
         std::cout << "\n[CPLEX] ";

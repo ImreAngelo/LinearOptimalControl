@@ -42,8 +42,8 @@ double get_err(std::vector<double> approx, std::vector<double> solution, double 
     return get_err(approx, b, t0, t1);
 }
 
-//constexpr int stepsizes[] = { 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 120, 140, 160, 180, 200, 250 };
-constexpr int stepsizes[] = { 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 120, 140, 160, 180, 200, 250, 300, 350, 400, 450, 500 };
+constexpr int stepsizes[] = { 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 230, 240, 250 };
+//constexpr int stepsizes[] = { 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 120, 140, 160, 180, 200, 250, 300, 350, 400, 450, 500 };
 
 void debug(std::function<Linear::Solution(size_t, int)> solve, int method, double t0 = 0, double t1 = 1, double solution = 0)
 {
