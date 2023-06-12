@@ -10,7 +10,7 @@ using Matrix = MatrixUtil::Matrix<T>;
 /// </summary>
 inline IloNumExprArg integrate(const IloEnv& env, const Matrix<IloNumVar>& y, const Eigen::MatrixXd yPhi, const double dt, const size_t steps, const double t0, const double p)
 {
-    TIMER_START("Integration");
+    TIME_FUNCTION();
     
     IloNumVar zero(env, 0, 0);
     IloNumExprArg obj = zero - zero;
@@ -33,7 +33,7 @@ inline IloNumExprArg integrate(const IloEnv& env, const Matrix<IloNumVar>& y, co
 
 Linear::Solution Linear::solve_t(const double t0, const double t1, RungeKutta::ButcherTable butcherTable, Func Fc, MatrixT Fy, MatrixT Fu, size_t steps, const Eigen::MatrixXd yPhi, double p)
 {
-    TIME_FUNCTION();
+    // TIME_FUNCTION();
 
     const double dt = (t1 - t0) / steps;
     const size_t dim = Fu.cols();
@@ -45,16 +45,15 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, RungeKutta::B
     Matrix<IloNumVar> u(dim, steps);
     Matrix<IloNumVar> y(dim, steps);
 
-    // Cheat for example 3 - TODO: Take lb & ub as parameters
-    constexpr float max[2] = { FLT_MAX, 0.0f };
-    constexpr float min[2] = { 0.0f,-FLT_MAX };
-
     for (auto j = 0; j < steps; j++) {   // Col
         for (auto i = 0; i < dim; i++) { // Row
-            u(i, j) = (dim == 2) ? IloNumVar(env, min[i], max[i], IloNumVar::Float) : IloNumVar(env, 0, 1);
+            // Cheat for example 3
+            u(i, j) = (dim == 2) ? IloNumVar(env, 0, 10, IloNumVar::Float) : IloNumVar(env, 0, 1);
             y(i, j) = IloNumVar(env, 0, FLT_MAX);
         }
     }
+
+    //u(dim - 1, steps - 1).end();
 
     // Debug example 3 - TODO: Build algebraic constraints from function parameters, see solve()
     if (dim == 2)
@@ -64,19 +63,19 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, RungeKutta::B
 
         for (auto n = 0; n < steps; n++)
         {
-            model.add(0 == u(0, n) + a * u(1, n));
+            model.add(0 == u(0, n) - a * u(1, n));
             model.add(y(1, n) - u(0, n) / k1 + u(1, n) / k2 >= 0);
         }
     }
-
-    // Complete Parameterization
-    RungeKutta::parameterize(model, y, u, Fc, Fy, Fu, dt, t0, butcherTable);
 
     // Build objective function
     const IloNumExprArg obj = integrate(env, y, yPhi, dt, steps, t0, p);
     model.add(IloMinimize(env, obj));
 
-    TIMER_START("Set boundary");
+    // Complete Parameterization
+    RungeKutta::parameterize(model, y, u, Fc, Fy, Fu, dt, t0, butcherTable);
+
+    // TIMER_START("Set boundary");
 
     // Add boundary conditions
     // TODO: Boundary matrices as function parameters
@@ -88,8 +87,9 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, RungeKutta::B
         TIMER_START("CPLEX");
 
         IloCplex cplex(model);
+        cplex.setParam(IloCplex::Threads, 2);
 
-#ifdef _DEBUG
+#ifdef FALSE
         std::cout << "\n[CPLEX] ";
 #else
         cplex.setOut(env.getNullStream());
@@ -109,12 +109,14 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, RungeKutta::B
             auto& obj = objective[i];
 
             ctrl.reserve(steps - 1);
-            obj.reserve(steps - 1);
+            obj.reserve(steps);
 
             for (auto j = 0; j < steps - 1; j++) {
                 ctrl.emplace_back(cplex.getValue(u(i, j)));
                 obj.emplace_back(cplex.getValue(y(i, j)));
             }
+
+            obj.emplace_back(cplex.getValue(y(i, steps - 1)));
         }
 
         env.end();
@@ -129,6 +131,5 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, RungeKutta::B
     }
 
     std::cerr << "\n[Error] Could not solve, returning 0\n\n";
-    std::vector<double> zero(steps, 0);
-    return { MultiVector(dim, zero), MultiVector(dim, zero) };
+    return { MultiVector(dim, { (double)steps - 1, 0 }), MultiVector(dim, { (double)steps, 0 })};
 };
