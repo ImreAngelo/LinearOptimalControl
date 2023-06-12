@@ -161,13 +161,13 @@ void Rendering::MainWindow::render()
         for (auto i = 0; i < x.size(); i++)
             time[i] = ((t1 - t0) / steps) * i;
 
-        const auto [high_res_u, high_res_y] = Linear::solve_t(t0, t1, RungeKutta::getTable(method), Fc, Fy, Fu, 249, phi, 1);
-        const auto err = get_err(yt[1], high_res_y[1], t0, t1);
-        const auto sol = integrate(high_res_y[1], t0, t1);
+        //const auto [high_res_u, high_res_y] = Linear::solve_t(t0, t1, RungeKutta::getTable(method), Fc, Fy, Fu, 249, phi, 1);
+        //const auto err = get_err(yt[1], high_res_y[1], t0, t1);
+        //const auto sol = integrate(high_res_y[1], t0, t1);
 
         // std::cout << "Error Sum of Objective: " << err << "\n\n";
 
-        debug([=](size_t s, int m) { return Linear::solve_t(t0, t1, RungeKutta::getTable(m), Fc, Fy, Fu, s, phi, 1); }, method, t0, t1, sol);
+        //debug([=](size_t s, int m) { return Linear::solve_t(t0, t1, RungeKutta::getTable(m), Fc, Fy, Fu, s, phi, 1); }, method, t0, t1, sol);
     }
 
     // ===== Runge-Kutta Method
@@ -192,7 +192,7 @@ void Rendering::MainWindow::render()
     }
 
     ImGui::InputInt("Steps", &steps, 1, 25);
-    steps = std::min(std::max(steps, 2), 500);
+    steps = std::min(std::max(steps, 2), 1000000);
 
     // ===== TODO: Calculate on button press
 

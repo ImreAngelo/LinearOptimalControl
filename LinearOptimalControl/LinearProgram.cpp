@@ -87,7 +87,7 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, RungeKutta::B
         TIMER_START("CPLEX");
 
         IloCplex cplex(model);
-        cplex.setParam(IloCplex::Threads, 8);
+        cplex.setParam(IloCplex::Threads, 2);
 
 #ifdef FALSE
         std::cout << "\n[CPLEX] ";

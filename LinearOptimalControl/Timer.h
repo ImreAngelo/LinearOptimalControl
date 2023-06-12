@@ -1,6 +1,6 @@
 #pragma once
 
-#ifndef TIMING
+#ifdef TIMING
 #define TIME_FUNCTION() {}
 #define TIME_SCOPE(name) {}
 #define TIMER_START(name) {}
@@ -27,7 +27,7 @@ struct Timer
 	{
 		auto duration = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start);
 		//std::cout << "\n[Timer] " << name << ": " << duration.count() << " " << (char)(230) << "s\n";
-		std::cout << ((double)duration.count()) / 1000 << ((name == "CPLEX") ? "" : ", ");
+		std::cout << ((double)duration.count()) / 1000 << ((name == "CPLEX") ? "\n" : ", ");
 	}
 };
 
