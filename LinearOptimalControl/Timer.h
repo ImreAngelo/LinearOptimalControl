@@ -1,11 +1,6 @@
 #pragma once
 
 #ifdef TIMING
-#define TIME_FUNCTION() {}
-#define TIME_SCOPE(name) {}
-#define TIMER_START(name) {}
-#define TIMER_STOP() {}
-#else
 #include <chrono>
 #include <iostream>
 
@@ -49,5 +44,9 @@ namespace ManualTimer
 		active = new Timer(name);
 	};
 };
-
+#else
+#define TIME_FUNCTION() {}
+#define TIME_SCOPE(name) {}
+#define TIMER_START(name) {}
+#define TIMER_STOP() {}
 #endif // _DEBUG

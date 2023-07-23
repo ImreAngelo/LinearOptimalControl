@@ -27,13 +27,15 @@ inline IloNumExprArg integrate(const IloEnv& env, const Matrix<IloNumVar>& y, co
             );
     }
 
-    zero.end(); // This does nothing
     return obj;
 }
 
-Linear::Solution Linear::solve_t(const double t0, const double t1, RungeKutta::ButcherTable butcherTable, Func Fc, MatrixT Fy, MatrixT Fu, size_t steps, const Eigen::MatrixXd yPhi, double p)
+Linear::Solution Linear::solve_t(const double t0, const double t1, RungeKutta::ButcherTable butcherTable, Func Fc, MatrixT Fy, MatrixT Fu, size_t steps, const Eigen::MatrixXd yPhi, double p, std::vector<Bound> ub, std::vector<Bound> yb)
 {
-    // TIME_FUNCTION();
+    TIME_FUNCTION();
+
+    assert(ub.size() == Fu.cols());
+    assert(yb.size() == Fu.rows());
 
     const double dt = (t1 - t0) / steps;
     const size_t dim = Fu.cols();
@@ -47,13 +49,11 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, RungeKutta::B
 
     for (auto j = 0; j < steps; j++) {   // Col
         for (auto i = 0; i < dim; i++) { // Row
-            // Cheat for example 3
-            u(i, j) = (dim == 2) ? IloNumVar(env, 0, 10, IloNumVar::Float) : IloNumVar(env, 0, 1);
-            y(i, j) = IloNumVar(env, 0, FLT_MAX);
+            const auto ubi = ub[i % ub.size()], ybi = yb[i % yb.size()];
+            u(i, j) = IloNumVar(env, ubi.l, ubi.u, ubi.type);
+            y(i, j) = IloNumVar(env, ybi.l, ybi.u, ybi.type);
         }
     }
-
-    //u(dim - 1, steps - 1).end();
 
     // Debug example 3 - TODO: Build algebraic constraints from function parameters, see solve()
     if (dim == 2)
@@ -75,10 +75,8 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, RungeKutta::B
     // Complete Parameterization
     RungeKutta::parameterize(model, y, u, Fc, Fy, Fu, dt, t0, butcherTable);
 
-    // TIMER_START("Set boundary");
-
-    // Add boundary conditions
     // TODO: Boundary matrices as function parameters
+    // Add boundary conditions
     for(auto i = 0; i < dim; i++)
         model.add(y(i, 0) == 1);
 

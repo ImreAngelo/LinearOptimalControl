@@ -138,6 +138,9 @@ void Rendering::MainWindow::render()
     if (ImGui::Button("Problem 3")) {
         t0 = 0; t1 = 1;
 
+        constexpr double a = 5.0;
+        constexpr float k1 = 2.0f, k2 = 8.0f;
+
         const auto Fy = Eigen::Matrix<std::function<double(double)>, 2, 2>::Constant([](double t) { return 0; });
         const auto Fc = [](double t) { return 0; };
 
@@ -151,7 +154,7 @@ void Rendering::MainWindow::render()
 
         print(3, steps, method);
 
-        auto [ ut, yt ] = Linear::solve_t(t0, t1, RungeKutta::getTable(method), Fc, Fy, Fu, steps, phi, 1);
+        auto [ ut, yt ] = Linear::solve_t(t0, t1, RungeKutta::getTable(method), Fc, Fy, Fu, steps, phi, 1, std::vector<Linear::Bound>{{0,10}});
         control = ut; state = yt; show = true;
 
         x = ut[1];

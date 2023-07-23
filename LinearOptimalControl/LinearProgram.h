@@ -15,11 +15,20 @@ namespace Linear
 		const MultiVector objective;
 	};
 
-	Solution solve_t(double t0, double t1, RungeKutta::ButcherTable butcherTable, Func Fc, MatrixT Fy, MatrixT Fu, size_t steps, const Eigen::MatrixXd yPhi, double p = 0);
+	struct Bound {
+		const float l = FLT_MIN;
+		const float u = FLT_MAX;
+		const IloNumVar::Type type = IloNumVar::Float;
+	};
+
+	const std::vector<Bound> def_ub{ {0,1} };
+	const std::vector<Bound> def_yb{ {0} };
+
+	Solution solve_t(double t0, double t1, RungeKutta::ButcherTable butcherTable, Func Fc, MatrixT Fy, MatrixT Fu, size_t steps, const Eigen::MatrixXd yPhi, double p = 0, std::vector<Bound> ub = def_ub, std::vector<Bound> yb = def_yb);
 	
 	Solution solve(double t0, double t1, size_t steps, Func Fc, MatrixT Fy, MatrixT Fu, Func Bc, MatrixT By, MatrixT Bu)
 	{
-		throw "error";
+		throw "error not implemented";
 	};
 }
 
