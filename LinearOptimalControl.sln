@@ -23,10 +23,10 @@ Global
 		{193173AE-8098-42EB-9B23-2B76497214CC}.Release|x64.Build.0 = Release|x64
 		{193173AE-8098-42EB-9B23-2B76497214CC}.Release|x86.ActiveCfg = Release|Win32
 		{193173AE-8098-42EB-9B23-2B76497214CC}.Release|x86.Build.0 = Release|Win32
-		{193173AE-8098-42EB-9B23-2B76497214CC}.Timing|x64.ActiveCfg = Timing|x64
-		{193173AE-8098-42EB-9B23-2B76497214CC}.Timing|x64.Build.0 = Timing|x64
-		{193173AE-8098-42EB-9B23-2B76497214CC}.Timing|x86.ActiveCfg = Timing|Win32
-		{193173AE-8098-42EB-9B23-2B76497214CC}.Timing|x86.Build.0 = Timing|Win32
+		{193173AE-8098-42EB-9B23-2B76497214CC}.Timing|x64.ActiveCfg = Timer|x64
+		{193173AE-8098-42EB-9B23-2B76497214CC}.Timing|x64.Build.0 = Timer|x64
+		{193173AE-8098-42EB-9B23-2B76497214CC}.Timing|x86.ActiveCfg = Timer|Win32
+		{193173AE-8098-42EB-9B23-2B76497214CC}.Timing|x86.Build.0 = Timer|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

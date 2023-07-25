@@ -9,7 +9,7 @@ void initSystem(bool release = false)
 #if defined(_DEBUG) || defined(TIMING)
     ShowWindow(GetConsoleWindow(), SW_SHOW);
 #else
-    // ShowWindow(GetConsoleWindow(), SW_HIDE);
+    ShowWindow(GetConsoleWindow(), SW_HIDE);
 #endif // _DEBUG || TIMING
 }
 

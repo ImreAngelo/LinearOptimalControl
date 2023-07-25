@@ -19,6 +19,10 @@ namespace Rendering
 	private:
 		std::vector<double> time, x, y;
 		std::vector<std::vector<double>> control, state;
+		
+		void example_one();
+		void example_two();
+		void example_three();
 	};
 }
 

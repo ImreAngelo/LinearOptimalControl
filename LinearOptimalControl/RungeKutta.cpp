@@ -28,7 +28,7 @@ void RungeKutta::parameterize(IloModel& model, const IloMatrix y, const IloMatri
 
         // ===== Intermediary step
         // *** TODO: 
-        //  - Use matrix operations instead of std::vectors
+        //  - Use matrix operations instead of std::vectors (not possible with non-primitive types!!!)
         //  - I.e. sum = [a.row(i) * k(i)].sum()
         //  - Rename variables (dims = s etc.)
 
@@ -58,7 +58,6 @@ void RungeKutta::parameterize(IloModel& model, const IloMatrix y, const IloMatri
             auto _s = MatrixUtil::mul(fy, sum);
             auto _y = MatrixUtil::mul(fy, (IloMatrix)(y.col(n)));
             auto _u = MatrixUtil::mul(fu, (IloMatrix)(u.col(n)));
-            //auto _v = MatrixUtil::mul(fu, sum);
 
             for (auto j = 0; j < dims; j++)
                 k(i, j) = dt * (_c + _y(j, 0) + _s(j) + _u(j, 0));

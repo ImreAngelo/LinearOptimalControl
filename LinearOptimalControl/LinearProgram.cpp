@@ -30,12 +30,18 @@ inline IloNumExprArg integrate(const IloEnv& env, const Matrix<IloNumVar>& y, co
     return obj;
 }
 
-Linear::Solution Linear::solve_t(const double t0, const double t1, RungeKutta::ButcherTable butcherTable, Func Fc, MatrixT Fy, MatrixT Fu, size_t steps, const Eigen::MatrixXd yPhi, double p, std::vector<Bound> ub, std::vector<Bound> yb)
+/// <summary>
+/// Set algebraic constraints
+/// </summary>
+inline void setConstraints(const IloEnv& env, const Matrix<IloNumVar>& u, const Matrix<IloNumVar>& y)
 {
-    TIME_FUNCTION();
+    // ...
+}
 
-    assert(ub.size() == Fu.cols());
-    assert(yb.size() == Fu.rows());
+Linear::Solution Linear::solve(const double t0, const double t1, RungeKutta::ButcherTable butcherTable, Func Fc, MatrixT Fy, MatrixT Fu, Func Gt, MatrixT Gy, MatrixT Gu, Func Ht, MatrixT Hy, MatrixT Hu, size_t steps, const Eigen::MatrixXd yPhi, double p, std::vector<Bound> ub, std::vector<Bound> yb)
+{
+    //assert(...);
+    TIME_FUNCTION();
 
     const double dt = (t1 - t0) / steps;
     const size_t dim = Fu.cols();
@@ -55,16 +61,26 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, RungeKutta::B
         }
     }
 
-    // Debug example 3 - TODO: Build algebraic constraints from function parameters, see solve()
-    if (dim == 2)
+    // Set algebraic constraints
+    // TODO: Consolidate with RungeKutta::parameterize() -> abstract into same helper function
+    for (auto n = 0; n < steps; n++)
     {
-        constexpr double a = 5.0;
-        constexpr float k1 = 2.0f, k2 = 8.0f;
+        const double t = t0 + dt * n;
 
-        for (auto n = 0; n < steps; n++)
+        const auto gu = MatrixUtil::eval(Gu, t);
+        const auto hu = MatrixUtil::eval(Hu, t);
+        const auto gy = MatrixUtil::eval(Gy, t);
+        const auto hy = MatrixUtil::eval(Hy, t);
+
+        const auto _gu = MatrixUtil::mul(gu, static_cast<Matrix<IloNumVar>>(u.col(n)));
+        const auto _hu = MatrixUtil::mul(hu, static_cast<Matrix<IloNumVar>>(u.col(n)));
+        const auto _gy = MatrixUtil::mul(gy, static_cast<Matrix<IloNumVar>>(y.col(n)));
+        const auto _hy = MatrixUtil::mul(hy, static_cast<Matrix<IloNumVar>>(y.col(n)));
+
+        for (auto d = 0; d < dim; d++)
         {
-            model.add(0 == u(0, n) - a * u(1, n));
-            model.add(y(1, n) - u(0, n) / k1 + u(1, n) / k2 >= 0);
+            model.add(Gt(t) == _gy(d, 0) + _gu(d, 0));
+            model.add(Ht(t) <= _hy(d, 0) + _hu(d, 0));
         }
     }
 
@@ -75,8 +91,8 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, RungeKutta::B
     // Complete Parameterization
     RungeKutta::parameterize(model, y, u, Fc, Fy, Fu, dt, t0, butcherTable);
 
-    // TODO: Boundary matrices as function parameters
     // Add boundary conditions
+    // TODO: Boundary matrices as function parameters
     for(auto i = 0; i < dim; i++)
         model.add(y(i, 0) == 1);
 
@@ -86,12 +102,7 @@ Linear::Solution Linear::solve_t(const double t0, const double t1, RungeKutta::B
 
         IloCplex cplex(model);
         cplex.setParam(IloCplex::Threads, 2);
-
-#ifdef FALSE
-        std::cout << "\n[CPLEX] ";
-#else
         cplex.setOut(env.getNullStream());
-#endif // _DEBUG
 
         cplex.solve();
 

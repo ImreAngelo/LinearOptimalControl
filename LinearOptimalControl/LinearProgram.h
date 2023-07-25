@@ -16,7 +16,7 @@ namespace Linear
 	};
 
 	struct Bound {
-		const float l = FLT_MIN;
+		const float l = -FLT_MAX;
 		const float u = FLT_MAX;
 		const IloNumVar::Type type = IloNumVar::Float;
 	};
@@ -24,12 +24,27 @@ namespace Linear
 	const std::vector<Bound> def_ub{ {0,1} };
 	const std::vector<Bound> def_yb{ {0} };
 
-	Solution solve_t(double t0, double t1, RungeKutta::ButcherTable butcherTable, Func Fc, MatrixT Fy, MatrixT Fu, size_t steps, const Eigen::MatrixXd yPhi, double p = 0, std::vector<Bound> ub = def_ub, std::vector<Bound> yb = def_yb);
-	
-	Solution solve(double t0, double t1, size_t steps, Func Fc, MatrixT Fy, MatrixT Fu, Func Bc, MatrixT By, MatrixT Bu)
-	{
-		throw "error not implemented";
-	};
+	/// <summary>
+	/// Solve the given linear optimal control problem by complete parameterization
+	/// </summary>
+	/// <param name="t0">Start of time horizon</param>
+	/// <param name="t0">End of time horizon</param>
+	/// <param name="bt">Butcher table used to discretize state</param>
+	/// <param name="Fc">Constant coefficients</param>
+	/// <param name="Fy">State coefficients matrix</param>
+	/// <param name="Fu">Control coefficients matrix</param>
+	/// <param name="steps">Number of steps used in state discretization</param>
+	/// <param name="yPhi">Objective coefficients matrix</param>
+	/// <param name="p">Objective (negative) growth term</param>
+	/// <param name="ub">Upper and lower bounds for the control</param>
+	/// <param name="yb">Upper and lower bounds for the state</param>
+	Solution solve(double t0, double t1, RungeKutta::ButcherTable bt, 
+		Func Fc, MatrixT Fy, MatrixT Fu, 
+		Func Gt, MatrixT Gy, MatrixT Gu,
+		Func Ht, MatrixT Hy, MatrixT Hu,
+		size_t steps, const Eigen::MatrixXd yPhi, double p = 0, 
+		std::vector<Bound> ub = def_ub, std::vector<Bound> yb = def_yb
+	);
 }
 
 //class LinearProblem

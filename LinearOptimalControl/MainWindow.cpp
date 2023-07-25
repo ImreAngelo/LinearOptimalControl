@@ -4,6 +4,10 @@
 #include "Color.h"
 #include <imgui.h>
 
+
+// ===== Debugging
+
+
 void print(int n, int steps, int method)
 {
     std::string s("");
@@ -42,43 +46,127 @@ double get_err(std::vector<double> approx, std::vector<double> solution, double 
     return get_err(approx, b, t0, t1);
 }
 
-constexpr int stepsizes[] = { 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 230, 240, 250 };
-//constexpr int stepsizes[] = { 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 120, 140, 160, 180, 200, 250, 300, 350, 400, 450, 500 };
-
 void debug(std::function<Linear::Solution(size_t, int)> solve, int method, double t0 = 0, double t1 = 1, double solution = 0)
 {
-    std::cout << "\n\nSOLVING HIGH RESOLUTION (IGNORE)\n\n";
-    const auto [high_res_u, high_res_y] = solve((solution) ? 1 : 500, 3);
-
 #ifdef TIMING
-
     std::cout << "\n\nn, int, param, cplex";
 
-    for (auto i = 0; i < IM_ARRAYSIZE(stepsizes); i++)
+    for (auto i = 1; i <= 25; i++)
     {
-        std::cout << "\n" << stepsizes[i] << ", " << std::setprecision(8);
+        std::cout << "\n" << i * 10 << ", " << std::setprecision(8);
 
-        const auto [ui, yi] = solve(stepsizes[i], method);
+        const auto [ui, yi] = solve(i * 10, method);
     }
 
 #endif // TIMING
 #ifdef _DEBUG
 
-    //std::cout << "\n\nn, param, cplex\n";
+    std::cout << "\n\nSOLVING HIGH RESOLUTION (IGNORE)\n\n";
+    const auto [high_res_u, high_res_y] = solve((solution) ? 1 : 500, 3);
+
     std::cout << "\n\nn, y\n";
 
-    for (auto i = 0; i < IM_ARRAYSIZE(stepsizes); i++)
+    for (auto i = 1; i <= 25; i++)
     {
-        const auto [ui, yi] = solve(stepsizes[i], method);
+        const auto [ui, yi] = solve(i * 10, method);
 
-        std::cout << stepsizes[i] << ", " << std::setprecision(8) << ((solution) ? get_err(yi[0], solution, t0, t1) : get_err(yi[0], high_res_y[0], t0, t1)) << "\n";
+        std::cout << i * 10 << ", " << std::setprecision(8) << ((solution) ? get_err(yi[0], solution, t0, t1) : get_err(yi[0], high_res_y[0], t0, t1)) << "\n";
         // std::cout << "Objective: " << std::setprecision(8) << integrate(yi[1], t0, t1) << " / " << solution << "\n";
         // std::cout << "Error Sum of Objective: " << std::setprecision(8) << get_err(yi[0], high_res_y[0], t0, t1) << "\n";
     }
 
 #endif // _DEBUG
-
 }
+
+
+// ===== Examples
+
+
+void Rendering::MainWindow::example_one()
+{
+    t0 = 0;
+    t1 = 2;
+
+    print(1, steps, method);
+
+    const auto ph = Eigen::MatrixXd::Constant(1, 1, 1.0);
+    const auto F0 = Eigen::Matrix<std::function<double(double)>, 1, 1>::Constant([](double t) { return  0.0; });
+    const auto Fu = Eigen::Matrix<std::function<double(double)>, 1, 1>::Constant([](double t) { return -1.0; });
+
+    const auto [ut, yt] = Linear::solve(t0, t1, RungeKutta::getTable(method), F0(0, 0), F0, Fu, F0(0,0), F0, F0, F0(0, 0), F0, F0, steps + 1, ph);
+    control = ut; state = yt; show = true;
+
+    debug([=](size_t s, int m) { return Linear::solve(t0, t1, RungeKutta::getTable(m), F0(0, 0), F0, Fu, F0(0, 0), F0, F0, F0(0,0), F0, F0, s, ph); }, method, t0, t1, 0.5);
+}
+
+void Rendering::MainWindow::example_two()
+{
+    t0 = 0;
+    t1 = 3;
+
+    print(2, steps, method);
+
+    const auto ph = Eigen::MatrixXd::Constant(1, 1, 1.0);
+    const auto M0 = Eigen::Matrix<std::function<double(double)>, 1, 1>::Constant([](double t) { return 0; });
+    const auto Fy = Eigen::Matrix<std::function<double(double)>, 1, 1>::Constant([](double t) { return .7; });
+    const auto Fu = Eigen::Matrix<std::function<double(double)>, 1, 1>::Constant([](double t) { return -1; });
+    const auto Fc = [](double t) { return .1 * t; };
+
+    const auto [ut, yt] = Linear::solve(t0, t1, RungeKutta::getTable(method), Fc, Fy, Fu, M0(0,0), M0, M0, M0(0, 0), M0, M0, steps, ph);
+    control = ut; state = yt; show = true;
+
+    debug([=](size_t s, int m) { return Linear::solve(t0, t1, RungeKutta::getTable(m), Fc, Fy, Fu, M0(0,0), M0, M0, M0(0,0), M0, M0, s, ph); }, method, t0, t1);
+}
+
+void Rendering::MainWindow::example_three()
+{
+    t0 = 0; t1 = 1;
+
+    constexpr double a = 5.0;
+    constexpr float k1 = 2.0f, k2 = 8.0f;
+
+    // ===
+
+    const auto M0 = Eigen::Matrix<std::function<double(double)>, 2, 2>::Constant([](double t) { return 0; });
+
+    Eigen::Matrix<std::function<double(double)>, 2, 2> Fu;
+    Eigen::Matrix<std::function<double(double)>, 2, 2> Gu;
+    Eigen::Matrix<std::function<double(double)>, 2, 2> Hu;
+    Eigen::Matrix<std::function<double(double)>, 2, 2> Hy;
+    Eigen::Matrix<double, 1, 2> phi;
+
+    Fu << [](double t) { return -1.0; }, [](double t) { return 0.0; },
+          [](double t) { return 0.0; },  [](double t) { return 1.0; };
+
+    Gu << [](double t) { return 1.0; }, [a](double t) { return -a; },
+          [](double t) { return 0.0; }, [](double t) { return 0.0; };
+
+    Hu << [k1](double t) { return -1/k1; }, [k2](double t) { return 1/k2; },
+          [](double t) { return 0.0; },       [](double t) { return 0.0; };
+    
+    Hy << [](double t) { return 0.0; }, [](double t) { return 1.0; },
+          [](double t) { return 0.0; }, [](double t) { return 0.0; };
+
+    phi << 0.0, -1.0;
+
+    print(3, steps, method);
+
+    auto [ut, yt] = Linear::solve(t0, t1, RungeKutta::getTable(method), M0(0,0), M0, Fu, M0(0, 0), M0, Gu, M0(0,0), Hy, Hu, steps, phi, 1, std::vector<Linear::Bound>{ {0, 10}});
+    control = ut; state = yt; show = true;
+
+    x = ut[1];
+    y = yt[1];
+
+    time = std::vector<double>(x.size(), 0.0);
+    for (auto i = 0; i < x.size(); i++)
+        time[i] = ((t1 - t0) / steps) * i;
+
+    // debug([=](size_t s, int m) { return Linear::solve(t0, t1, RungeKutta::getTable(m), Fc, Fy, Fu, s, phi, 1); }, method, t0, t1, sol);
+}
+
+
+// ===== Rendering
+
 
 void Rendering::MainWindow::render()
 {
@@ -98,80 +186,18 @@ void Rendering::MainWindow::render()
     ImGui::Text("Examples");
     ImGui::Dummy(ImVec2(0.0f, 2.0f));
 
-    if (ImGui::Button("Problem 1")) {
-        t0 = 0;
-        t1 = 2;
-
-        print(1, steps, method);
-
-        const auto ph = Eigen::MatrixXd::Constant(1, 1, 1.0);
-        const auto F0 = Eigen::Matrix<std::function<double(double)>, 1, 1>::Constant([](double t) { return  0.0; });
-        const auto Fu = Eigen::Matrix<std::function<double(double)>, 1, 1>::Constant([](double t) { return -1.0; });
-
-        const auto [ ut, yt ] = Linear::solve_t(t0, t1, RungeKutta::getTable(method), F0(0,0), F0, Fu, steps + 1, ph);
-        control = ut; state = yt; show = true;
-
-        debug([=](size_t s, int m) { return Linear::solve_t(t0, t1, RungeKutta::getTable(m), F0(0, 0), F0, Fu, s, ph); }, method, t0, t1, 0.5);
-    }
+    if (ImGui::Button("Problem 1"))
+        example_one();
 
     ImGui::SameLine();
 
-    if (ImGui::Button("Problem 2")) {
-        t0 = 0;
-        t1 = 3;
-
-        print(2, steps, method);
-
-        const auto ph = Eigen::MatrixXd::Constant(1, 1, 1.0);
-        const auto Fy = Eigen::Matrix<std::function<double(double)>, 1, 1>::Constant([](double t) { return .7; });
-        const auto Fu = Eigen::Matrix<std::function<double(double)>, 1, 1>::Constant([](double t) { return -1; });
-        const auto Fc = [](double t) { return .1*t; };
-
-        const auto [ut, yt] = Linear::solve_t(t0, t1, RungeKutta::getTable(method), Fc, Fy, Fu, steps, ph);
-        control = ut; state = yt; show = true;
-
-        debug([=](size_t s, int m) { return Linear::solve_t(t0, t1, RungeKutta::getTable(m), Fc, Fy, Fu, s, ph); }, method, t0, t1);
-    }
+    if (ImGui::Button("Problem 2"))
+        example_two();
 
     ImGui::SameLine();
 
-    if (ImGui::Button("Problem 3")) {
-        t0 = 0; t1 = 1;
-
-        constexpr double a = 5.0;
-        constexpr float k1 = 2.0f, k2 = 8.0f;
-
-        const auto Fy = Eigen::Matrix<std::function<double(double)>, 2, 2>::Constant([](double t) { return 0; });
-        const auto Fc = [](double t) { return 0; };
-
-        Eigen::Matrix<std::function<double(double)>, 2, 2> Fu;
-        Eigen::Matrix<double, 1, 2> phi;
-
-        Fu << [](double t) { return -1.0; }, [](double t) { return 0.0; },
-              [](double t) { return 0.0; }, [](double t) { return 1.0; };
-
-        phi << 0.0, -1.0;
-
-        print(3, steps, method);
-
-        auto [ ut, yt ] = Linear::solve_t(t0, t1, RungeKutta::getTable(method), Fc, Fy, Fu, steps, phi, 1, std::vector<Linear::Bound>{{0,10}});
-        control = ut; state = yt; show = true;
-
-        x = ut[1];
-        y = yt[1];
-
-        time = std::vector<double>(x.size(), 0.0);
-        for (auto i = 0; i < x.size(); i++)
-            time[i] = ((t1 - t0) / steps) * i;
-
-        //const auto [high_res_u, high_res_y] = Linear::solve_t(t0, t1, RungeKutta::getTable(method), Fc, Fy, Fu, 249, phi, 1);
-        //const auto err = get_err(yt[1], high_res_y[1], t0, t1);
-        //const auto sol = integrate(high_res_y[1], t0, t1);
-
-        // std::cout << "Error Sum of Objective: " << err << "\n\n";
-
-        //debug([=](size_t s, int m) { return Linear::solve_t(t0, t1, RungeKutta::getTable(m), Fc, Fy, Fu, s, phi, 1); }, method, t0, t1, sol);
-    }
+    if (ImGui::Button("Problem 3"))
+        example_three();
 
     // ===== Runge-Kutta Method
 
@@ -204,7 +230,7 @@ void Rendering::MainWindow::render()
     
     // ===== Print CSV
 
-//#ifdef _DEBUG
+#if defined(_DEBUG) || defined(TIMING)
     // Print CSV for thesis graphs
     if (ImGui::Button("Print CSV to console"))
     {
@@ -216,7 +242,7 @@ void Rendering::MainWindow::render()
                 std::cout << std::setw(10) << ((t1 - t0) / (steps - 1)) * i << ", " << std::setw(10) << std::round(control[d][(int)std::min(i, steps - 2)] * 10000) / 10000 << ", " << std::setw(10) << std::round(state[d][i] * 10000) / 10000 << std::endl;
         }
     }
-//#endif // _DEBUG
+#endif // _DEBUG
 
     // ===== End GUI
 

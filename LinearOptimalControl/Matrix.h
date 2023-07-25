@@ -23,7 +23,7 @@ namespace MatrixUtil
                 //std::cout << i << "/" << lhs.rows() << "\n" << j << "/" << rhs.cols() << "\n\n";
                 IloNumExpr sum = lhs(i, 0) * rhs(0, j);
                 for (auto r = 1; r < rhs.rows(); r++) {
-                    sum = sum + lhs(i, r) * rhs(r, j);
+                    sum = sum + (lhs(i, r) * rhs(r, j));
                 }
 
                 expr(i, j) = sum;
