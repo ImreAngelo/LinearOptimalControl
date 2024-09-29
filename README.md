@@ -1,5 +1,5 @@
 # Linear Optimal Control Solver
-This solver was developed as part of a bachelor thesis in mathematics at NTNU. 
+This solver was developed as part of a [bachelor thesis](https://hdl.handle.net/11250/3085505) in mathematics at NTNU. 
 It solves linear optimal control problems by using complete parameterization.
 
 
